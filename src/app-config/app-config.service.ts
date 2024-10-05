@@ -7,42 +7,21 @@ export class AppConfigService {
   readonly port: number;
   readonly platform: Platform;
   readonly db_connection: string;
-  readonly pump?: PumpConfig;
-  readonly ape?: ApeConfig;
 
   constructor(configService: ConfigService) {
     this.port = configService.get<number>('app.port');
     this.db_connection = configService.get<string>('app.db_connection');
 
-    if (configService.get<any>(Platform.PUMP)) {
-      this.platform = Platform.PUMP;
-    } else if (configService.get<any>(Platform.APE)) {
-      this.platform = Platform.APE;
-    } else {
-      throw new Error('missing platform pump/age configuration');
-    }
-    switch (this.platform) {
-      case Platform.PUMP:
-        this.pump = new PumpConfig(configService);
-        break;
-      case Platform.APE:
-        this.ape = new ApeConfig(configService);
-        break;
-      default:
-        throw new Error(`platform is undefined`);
-    }
-  }
-
-  getPlatform(): Platform {
-    return this.platform
-  }
-
-  getPumpConfig(): PumpConfig {
-    return this.pump;
-  }
-
-  getApeConfig(): ApeConfig {
-    return this.ape;
+    // switch (this.platform) {
+    //   case Platform.PUMP:
+    //     this.pump = new PumpConfig(configService);
+    //     break;
+    //   case Platform.APE:
+    //     this.ape = new ApeConfig(configService);
+    //     break;
+    //   default:
+    //     throw new Error(`platform is undefined`);
+    // }
   }
 }
 

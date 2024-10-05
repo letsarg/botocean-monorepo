@@ -9,6 +9,7 @@ import { AppConfigService } from './app-config/app-config.service';
 import { AppConfigModule } from './app-config/app-config.module';
 import { DatabaseModule } from './database/database.module';
 import { PromptModule } from './prompt/prompt.module';
+import { ProviderModule } from './provider/provider.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PromptModule } from './prompt/prompt.module';
     AppConfigModule,
     DatabaseModule,
     PromptModule,
+    ProviderModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],

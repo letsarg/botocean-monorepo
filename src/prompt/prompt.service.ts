@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { ModelType } from './prompt.dto';
 
 @Injectable()
 export class PromptService {
-  async processPrompt(userId: string, model: string, prompt: string) {
-    // Here you can implement your logic to generate a response
-    // For now, we'll return dummy data for response, token_count, and token_price
+  async processPrompt(userId: string, model: ModelType, prompt: string) {
+    if (!Object.values(ModelType).includes(model)) {
+      throw new Error('Invalid model type');
+    }
 
     const response = `Generated response for the prompt: ${prompt}`;
     const tokenCount = this.calculateTokenCount(prompt);
