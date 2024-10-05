@@ -5,6 +5,8 @@ import { Provider } from 'src/provider/provider.dto';
 import { OllamaService } from 'src/provider/ollama/ollama.service';
 import { v4 as uuidv4 } from 'uuid';
 
+const TOKEN_PRICE = 0.00000000000001;
+
 @Injectable()
 export class PromptService {
   private readonly UUID_NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
@@ -77,6 +79,7 @@ export class PromptService {
     // take the first
     let provider = providers[0];
     let response: string;
+    let totalTokenCount= 0;
     switch (provider.model) {
       case ModelType.Qwen2_05b:
         let chatService = new OllamaService();
@@ -86,6 +89,7 @@ export class PromptService {
         }
         let res = await chatService.chat(provider.model, content, chatHistories);
         response = res.message.content
+        totalTokenCount = res.prompt_eval_count + res.eval_count;
 
         // save message to history
         let assistantContent: ChatContent = {
@@ -106,8 +110,8 @@ export class PromptService {
       model: model,
       prompt: prompt,
       response: response,
-      token_count: tokenCount,
-      token_price: tokenPrice,
+      token_count: totalTokenCount,
+      token_price: TOKEN_PRICE,
     };
   }
 
