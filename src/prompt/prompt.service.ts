@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { ChatContent, ModelType, NewChatResDto } from './prompt.dto';
+import { ChatContent, ChatInfo, ModelType, NewChatResDto, UserChat } from './prompt.dto';
 import { ProviderService } from 'src/provider/provider.service';
 import { Provider } from 'src/provider/provider.dto';
 import { OllamaService } from 'src/provider/ollama/ollama.service';
-import { v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PromptService {
   private readonly UUID_NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
+  /// userId -> chatId[]
+  private userChats: Map<string, string[]> = new Map();
+  /// chatId
+  private chatInfos: Map<string, ChatInfo> = new Map();
+  /// chatId -> 
   private chatHistories: Map<string, ChatContent[]> = new Map();
-  private chatConfigs: Map<string, ModelType> = new Map();
 
   constructor(
     private providerService: ProviderService,
@@ -24,12 +28,14 @@ export class PromptService {
   }
 
   async newChat(user_id: string, model: ModelType): Promise<NewChatResDto> {
-    // Create a new chat ID using UUID v5
-    const chatId = uuidv5(`${user_id}-${model}`, this.UUID_NAMESPACE);
+    const chatId = uuidv4();
 
     // Initialize an empty array of chat messages for this chat
+    this.userChats.set(user_id,
+      this.userChats.get(user_id) === undefined ?
+        [] : [...this.userChats.get(user_id), chatId])
+    this.chatInfos.set(chatId, { model, chatId });
     this.chatHistories.set(chatId, []);
-    this.chatConfigs.set(chatId, model);
 
     const response: NewChatResDto = {
       chat_id: chatId,
@@ -39,7 +45,7 @@ export class PromptService {
   }
 
   async processPrompt(userId: string, chatId: string, model: ModelType, prompt: string) {
-    if (!this.chatConfigs.get(chatId)) {
+    if (!this.chatInfos.get(chatId)) {
       throw new Error('Unexisting chatId');
     }
 
@@ -48,8 +54,16 @@ export class PromptService {
     }
 
     // update model changes
-    if (model !== this.chatConfigs.get(chatId)) {
-      this.chatConfigs.set(chatId, model);
+    let chatInfo = this.chatInfos.get(chatId);
+    if (model !== chatInfo.model) {
+      chatInfo.model = model;
+      this.chatInfos.set(chatId, chatInfo);
+    }
+
+    // update chat title
+    if (!chatInfo.chatTitle) {
+      chatInfo.chatTitle = prompt.length <= 25 ? prompt : prompt.slice(0, 24);
+      this.chatInfos.set(chatId, chatInfo);
     }
 
     let chatHistories = this.chatHistories.get(chatId);
