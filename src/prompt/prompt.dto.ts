@@ -5,12 +5,19 @@ export class NewChatDto {
 
 export class NewChatResDto {
   chat_id: string;
+  model: ModelType;
 }
 
 export class CreatePromptDto {
   user_id: string;
+  chat_id: string;
   model: ModelType;
   prompt: string;
+}
+
+export class ChatContent {
+  role: string;
+  content: string;
 }
 
 export enum ModelType {

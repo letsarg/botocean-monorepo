@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ModelType, NewChatResDto } from './prompt.dto';
+import { ChatContent, ModelType, NewChatResDto } from './prompt.dto';
 import { ProviderService } from 'src/provider/provider.service';
 import { Provider } from 'src/provider/provider.dto';
 import { OllamaService } from 'src/provider/ollama/ollama.service';
@@ -7,9 +7,10 @@ import { v5 as uuidv5 } from 'uuid';
 
 @Injectable()
 export class PromptService {
-  private readonly UUID_NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341'; 
+  private readonly UUID_NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
-  private chatHistories: Map<string, string[]> = new Map();
+  private chatHistories: Map<string, ChatContent[]> = new Map();
+  private chatConfigs: Map<string, ModelType> = new Map();
 
   constructor(
     private providerService: ProviderService,
@@ -28,17 +29,31 @@ export class PromptService {
 
     // Initialize an empty array of chat messages for this chat
     this.chatHistories.set(chatId, []);
+    this.chatConfigs.set(chatId, model);
 
     const response: NewChatResDto = {
       chat_id: chatId,
+      model,
     };
     return response;
   }
 
-  async processPrompt(userId: string, model: ModelType, prompt: string) {
+  async processPrompt(userId: string, chatId: string, model: ModelType, prompt: string) {
+    if (!this.chatConfigs.get(chatId)) {
+      throw new Error('Unexisting chatId');
+    }
+
     if (!Object.values(ModelType).includes(model)) {
       throw new Error('Invalid model type');
     }
+
+    // update model changes
+    if (model !== this.chatConfigs.get(chatId)) {
+      this.chatConfigs.set(chatId, model);
+    }
+
+    let chatHistories = this.chatHistories.get(chatId);
+    console.log(chatHistories);
 
     let providers = this.providerService.findProvidersByModel(model);
     if (providers.length == 0) {
@@ -47,12 +62,23 @@ export class PromptService {
 
     // take the first
     let provider = providers[0];
-    let response;
+    let response: string;
     switch (provider.model) {
       case ModelType.Qwen2_05b:
         let chatService = new OllamaService();
-        let res = await chatService.chat(provider.model, prompt);
-        response = res.message
+        let content: ChatContent = {
+          role: 'user',
+          content: prompt,
+        }
+        let res = await chatService.chat(provider.model, content, chatHistories);
+        response = res.message.content
+
+        // save message to history
+        let assistantContent: ChatContent = {
+          role: 'assistant',
+          content: response,
+        }
+        this.chatHistories.set(chatId, [...chatHistories, content, assistantContent]);
         break;
       default:
         break;

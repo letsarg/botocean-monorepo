@@ -6,19 +6,19 @@ import { CreatePromptDto, ModelType, NewChatDto, NewChatResDto } from './prompt.
 export class PromptController {
   constructor(private readonly promptService: PromptService) { }
 
-  @Post()
+  @Post('newChat')
   async newChat(@Body() body: NewChatDto): Promise<NewChatResDto> {
     const { user_id, model } = body;
     return this.promptService.newChat(user_id, model);
   }
 
-  @Post()
-  async handlePrompt(@Body() body: CreatePromptDto) {
-    const { user_id, model, prompt } = body;
+  @Post('ask')
+  async ask(@Body() body: CreatePromptDto) {
+    const { user_id, chat_id, model, prompt } = body;
 
     // this.promptService.checkBalance()
 
-    const result = await this.promptService.processPrompt(user_id, model, prompt);
+    const result = await this.promptService.processPrompt(user_id, chat_id, model, prompt);
 
     return result;
   }

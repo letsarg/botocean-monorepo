@@ -1,10 +1,11 @@
 import ollama from 'ollama';
+import { ChatContent } from 'src/prompt/prompt.dto';
 
 export class OllamaService {
-  async chat(model: string, content: string, context?: string) {
+  async chat(model: string, content: ChatContent, histories: ChatContent[]) {
     const response = await ollama.chat({
       model,
-      messages: [{ role: 'user', content: content }],
+      messages: [...histories, content],
     });
     return response
   }
