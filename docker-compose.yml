@@ -1,0 +1,36 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: money_printer
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  # bot_pump:
+  #   build: .
+  #   container_name: nestjs-app
+  #   ports:
+  #     - '3000:3000' # Maps the host port 3000 to the container port 3000
+  #   depends_on:
+  #     - mongodb  # Ensure the MongoDB service starts before this service
+  #   environment:
+  #     MONGODB_URI: mongodb://mongodb:27017/your_database_name  # Connection string to MongoDB
+  #   restart: always
+
+  bot_ape:
+    build: .
+    container_name: nestjs-app
+    restart: always
+    ports:
+      - '3000:3000' # Maps the host port 3000 to the container port 3000
+    depends_on:
+      - mongodb  # Ensure the MongoDB service starts before this service
+    volumes:
+      - ./config.yml:/usr/src/app/config.yml
+
+volumes:
+  mongo_data:
