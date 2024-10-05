@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PromptService } from './prompt.service';
 import { PromptController } from './prompt.controller';
-import { ChatGptService } from '../provider/chatgpt/chatgpt.service';
-import { OllamaService } from '../provider/ollama/ollama.service';
+import { ProviderModule } from 'src/provider/provider.module';
 
 @Module({
   providers: [PromptService],
-  controllers: [PromptController]
+  controllers: [PromptController],
+  imports: [ProviderModule],
 })
-export class PromptModule {}
+export class PromptModule { }

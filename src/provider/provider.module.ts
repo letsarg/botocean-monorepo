@@ -4,6 +4,7 @@ import { ChatGptService } from './chatgpt/chatgpt.service';
 import { OllamaService } from './ollama/ollama.service';
 
 @Module({
-  providers: [ProviderService, ChatGptService, OllamaService]
+  providers: [ProviderService],
+  exports: [ProviderService],
 })
 export class ProviderModule { }

@@ -6,5 +6,5 @@ export class CreatePromptDto {
 
 export enum ModelType {
   ChatGPT4o = 'ChatGPT-4o',
-  Gwen2_05b = 'gwen2-0.5b',
+  Qwen2_05b = 'qwen2:0.5b',
 }

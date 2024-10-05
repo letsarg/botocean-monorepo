@@ -54,4 +54,18 @@ export class ProviderService {
       }
     }
   }
+
+  findProvidersByModel(model: ModelType): Provider[] {
+    // Get the list of provider IDs for the model
+    const providerIds = this.modelProviderMap.get(model);
+
+    if (!providerIds || providerIds.length === 0) {
+      return []; // No providers found for this model
+    }
+
+    // Retrieve the Provider instances from providerMap
+    return providerIds
+      .map((id) => this.providerMap.get(id))
+      .filter((provider): provider is Provider => provider !== undefined);
+  }
 }
