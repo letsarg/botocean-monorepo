@@ -1,10 +1,16 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { PromptService } from './prompt.service';
-import { CreatePromptDto, ModelType } from './prompt.dto';
+import { CreatePromptDto, ModelType, NewChatDto, NewChatResDto } from './prompt.dto';
 
 @Controller('prompt')
 export class PromptController {
   constructor(private readonly promptService: PromptService) { }
+
+  @Post()
+  async newChat(@Body() body: NewChatDto): Promise<NewChatResDto> {
+    const { user_id, model } = body;
+    return this.promptService.newChat(user_id, model);
+  }
 
   @Post()
   async handlePrompt(@Body() body: CreatePromptDto) {
