@@ -22,20 +22,18 @@ import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle } from "luci
 import { motion, AnimatePresence } from "framer-motion"
 
 const models = [
-  { id: "gpt-3.5", name: "GPT-3.5" },
-  { id: "gpt-4", name: "GPT-4" },
-  { id: "claude-v1", name: "Claude v1" },
-  { id: "claude-v2", name: "Claude v2" },
+  { id: "qwen2:0.5b", name: "qwen2:0.5b" },
 ]
 
 export default function ModernWeb3Chat() {
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [balance, setBalance] = useState("0.00")
+  const [chatId, setChatId] = useState()
   const [messages, setMessages] = useState([
     { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
   ])
   const [inputMessage, setInputMessage] = useState("")
-  const [selectedModel, setSelectedModel] = useState(models[0].id)
+  const [selectedModel, setSelectedModel] = useState(models[0].name)
   const [isSidebarVisible, setIsSidebarVisible] = useState(true)
 
   const connectWallet = () => {
@@ -43,22 +41,71 @@ export default function ModernWeb3Chat() {
     setBalance("1.23") // Simulated balance
   }
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (inputMessage.trim()) {
       setMessages([...messages, { id: messages.length + 1, content: inputMessage, sender: "user" }])
       setInputMessage("")
-      // Simulate bot response
-      setTimeout(() => {
+
+      const newChatData = {
+        user_id: '111111',
+        chat_id: chatId,
+        model: selectedModel,
+        prompt: inputMessage
+      }
+
+      try {
+        const response = await fetch('http://localhost:3001/prompt/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newChatData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create new chat');
+        }
+
+        const data = await response.json();
+        const content = data.response;
+        console.log(content);
         setMessages((prevMessages) => [
           ...prevMessages,
-          { id: prevMessages.length + 1, content: `I'm processing your request using ${selectedModel}...`, sender: "bot" },
+          { id: prevMessages.length + 1, content: content, sender: "assistant" },
         ])
-      }, 1000)
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
   }
 
-  const createNewChat = () => {
+  const createNewChat = async () => {
     setMessages([{ id: 1, content: "Hello! How can I assist you today?", sender: "bot" }])
+
+    const newChatData = {
+      user_id: '111111', // replace with the actual user ID
+      model: selectedModel,      // replace with the actual model type
+    };
+
+    try {
+      const response = await fetch('http://localhost:3001/prompt/newChat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newChatData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create new chat');
+      }
+
+      const data = await response.json();
+      setChatId(data.chat_id)
+      console.log(data); // New chat created successfully
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
   useEffect(() => {
@@ -196,8 +243,8 @@ export default function ModernWeb3Chat() {
               >
                 <div
                   className={`max-w-sm rounded-lg p-4 ${message.sender === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-800 border border-gray-200"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
                     }`}
                 >
                   <div className="flex items-center space-x-2 mb-2">
