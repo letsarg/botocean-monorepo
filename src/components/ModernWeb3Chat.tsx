@@ -148,10 +148,19 @@ export default function ModernWeb3Chat() {
             ))}
           </ScrollArea>
 
-          {/* Wallet connection / Settings */}
           <div className="border-t border-gray-200 p-4">
-            {isWalletConnected ? (
+            {connected ? (
               <>
+                <div className="bg-gray-50 p-3 rounded-md shadow-sm">
+                  <p className="text-sm mb-1">
+                    <span className="font-semibold text-gray-600">Balance:</span>{" "}
+                    <span className="font-bold text-gray-800">{ } APT</span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold text-gray-600">Model:</span>{" "}
+                    <span className="font-bold text-gray-800">{models.find(m => m.id === selectedModel)?.name}</span>
+                  </p>
+                </div>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full mb-2">
@@ -165,7 +174,7 @@ export default function ModernWeb3Chat() {
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
                       <div>
-                        <h3 className="text-sm font-medium mb-2">Model Selection</h3>
+                        <h1 className="text-m font-semibold mb-2">Model selection</h1>
                         <Select value={selectedModel} onValueChange={setSelectedModel}>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a model" />
@@ -180,7 +189,16 @@ export default function ModernWeb3Chat() {
                         </Select>
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium mb-2">Wallet Actions</h3>
+                        <h1 className="text-m font-semibold mb-2">Wallet balance</h1>
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">1 ETH</p>
+                        </div>
+                      </div>
+                      <div>
+                        <h1 className="text-m font-semibold mb-2">Botsocean balance</h1>
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">1 ETH</p>
+                        </div>
                         <div className="flex space-x-2">
                           <Button variant="outline" onClick={() => alert("Deposit functionality")} className="flex-1">
                             Deposit
@@ -193,16 +211,7 @@ export default function ModernWeb3Chat() {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <div className="bg-gray-50 p-3 rounded-md shadow-sm">
-                  <p className="text-sm mb-1">
-                    <span className="font-semibold text-gray-600">Balance:</span>{" "}
-                    <span className="font-bold text-gray-800">{balance} APT</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-semibold text-gray-600">Model:</span>{" "}
-                    <span className="font-bold text-gray-800">{models.find(m => m.id === selectedModel)?.name}</span>
-                  </p>
-                </div>
+
               </>
             ) : (
               <ShadcnWalletSelector />
