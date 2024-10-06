@@ -21,14 +21,16 @@ import {
 import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useWallet } from "@aptos-labs/wallet-adapter-react"
-import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
+import { useAutoConnect } from "@/components/AutoConnectProvider";
+import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
 
 const models = [
   { id: "qwen2:0.5b", name: "qwen2:0.5b" },
 ]
 
 export default function ModernWeb3Chat() {
+  const { autoConnect, setAutoConnect } = useAutoConnect();
   const { connect, disconnect, connected, wallet } = useWallet();
 
   const [isWalletConnected, setIsWalletConnected] = useState(false)
@@ -203,7 +205,8 @@ export default function ModernWeb3Chat() {
                 </div>
               </>
             ) : (
-              <WalletSelector />
+              <ShadcnWalletSelector />
+              // <WalletSelection />
               // <Button onClick={connectWallet} className="w-full">Connect Wallet</Button>
             )}
           </div>
