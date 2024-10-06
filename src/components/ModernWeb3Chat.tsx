@@ -24,14 +24,19 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react"
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk"
 
 const models = [
   { id: "qwen2:0.5b", name: "qwen2:0.5b" },
 ]
 
+type Coin = { coin: { value: string } };
+const config = new AptosConfig({ network: Network.DEVNET });
+const aptos = new Aptos(config);
+
 export default function ModernWeb3Chat() {
   const { autoConnect, setAutoConnect } = useAutoConnect();
-  const { connect, disconnect, connected, wallet } = useWallet();
+  const { connect, disconnect, connected, wallet, account, network } = useWallet();
 
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [balance, setBalance] = useState(0)
@@ -43,11 +48,36 @@ export default function ModernWeb3Chat() {
   const [selectedModel, setSelectedModel] = useState(models[0].name)
   const [isSidebarVisible, setIsSidebarVisible] = useState(true)
 
-  const connectWallet = () => {
-    // connect(WALLET_NAME.)
-    setIsWalletConnected(true)
-    setBalance(2.3145699675435) // Simulated balance
-  }
+  useEffect(() => {
+    setAutoConnect(true);
+  }, []);
+
+  let aptos: Aptos;
+  useEffect(() => {
+    if (network) {
+      const config = new AptosConfig({ network: network.name });
+      aptos = new Aptos(config);
+    }
+  }, [network])
+
+  useEffect(() => {
+    const getBalance = async () => {
+      if (account?.address) {
+        try {
+          const accountResource = await aptos.getAccountResource<Coin>({
+            accountAddress: account!.address,
+            resourceType: "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
+          });
+          console.log(accountResource.coin.value)
+          setBalance(Number(accountResource.coin.value) / Math.pow(10, 8));
+        } catch (error) {
+          console.error('Error fetching balance:', error);
+        }
+      }
+    }
+
+    getBalance();
+  }, [account])
 
   const sendMessage = async () => {
     if (inputMessage.trim()) {
@@ -153,7 +183,7 @@ export default function ModernWeb3Chat() {
               <>
                 <div className="bg-gray-50 p-3 rounded-md shadow-sm">
                   <p className="text-sm mb-1">
-                    <span className="font-semibold text-gray-600">Balance:</span>{" "}
+                    <span className="font-semibold text-gray-600">Balance: {balance}</span>{" "}
                     <span className="font-bold text-gray-800">{ } APT</span>
                   </p>
                   <p className="text-sm">
@@ -191,7 +221,7 @@ export default function ModernWeb3Chat() {
                       <div>
                         <h1 className="text-m font-semibold mb-2">Wallet balance</h1>
                         <div className="mb-4">
-                          <p className="text-sm font-medium">1 ETH</p>
+                          <p className="text-sm font-medium">{balance} APT</p>
                         </div>
                       </div>
                       <div>
