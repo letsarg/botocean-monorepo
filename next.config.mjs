@@ -3,6 +3,7 @@ const isProd = process.env.NODE_ENV === "production";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  crossOrigin: 'anonymous',
   reactStrictMode: true,
   transpilePackages: ["wallet-adapter-react", "wallet-adapter-plugin"],
   assetPrefix: "",
