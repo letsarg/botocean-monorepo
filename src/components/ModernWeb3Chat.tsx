@@ -224,7 +224,7 @@ export default function ModernWeb3Chat() {
               </Button>
             )}
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 text-black">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent>
@@ -236,7 +236,7 @@ export default function ModernWeb3Chat() {
               </SelectContent>
             </Select>
           </div>
-          <Button variant="ghost" size="sm" onClick={createNewChat}>
+          <Button variant="outline" size="sm" onClick={createNewChat}>
             <PlusCircle className="h-4 w-4 mr-2" />
             New Chat
           </Button>
