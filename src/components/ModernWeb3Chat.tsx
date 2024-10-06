@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle } from "lucide-react"
+import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useWallet } from "@aptos-labs/wallet-adapter-react"
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
@@ -31,8 +31,8 @@ const models = [
 ]
 
 type Coin = { coin: { value: string } };
-const config = new AptosConfig({ network: Network.DEVNET });
-const aptos = new Aptos(config);
+const aptosConfig = new AptosConfig({ network: Network.CUSTOM });
+const aptos = new Aptos(aptosConfig);
 
 export default function ModernWeb3Chat() {
   const { autoConnect, setAutoConnect } = useAutoConnect();
@@ -51,14 +51,6 @@ export default function ModernWeb3Chat() {
   useEffect(() => {
     setAutoConnect(true);
   }, []);
-
-  let aptos: Aptos;
-  useEffect(() => {
-    if (network) {
-      const config = new AptosConfig({ network: network.name });
-      aptos = new Aptos(config);
-    }
-  }, [network])
 
   useEffect(() => {
     const getBalance = async () => {
@@ -221,7 +213,7 @@ export default function ModernWeb3Chat() {
                       <div>
                         <h1 className="text-m font-semibold mb-2">Wallet balance</h1>
                         <div className="mb-4">
-                          <p className="text-sm font-medium">{balance} APT</p>
+                          <p className="text-sm font-medium">{balance} APT ({network?.name ?? ''})</p>
                         </div>
                       </div>
                       <div>
@@ -241,7 +233,10 @@ export default function ModernWeb3Chat() {
                     </div>
                   </DialogContent>
                 </Dialog>
-
+                <Button variant="outline" className="w-full mb-2" onClick={disconnect}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
               </>
             ) : (
               <ShadcnWalletSelector />
