@@ -20,14 +20,19 @@ import {
 } from "@/components/ui/select"
 import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useWallet } from "@aptos-labs/wallet-adapter-react"
+import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
+import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 
 const models = [
   { id: "qwen2:0.5b", name: "qwen2:0.5b" },
 ]
 
 export default function ModernWeb3Chat() {
+  const { connect, disconnect, connected, wallet } = useWallet();
+
   const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [balance, setBalance] = useState("0.00")
+  const [balance, setBalance] = useState(0)
   const [chatId, setChatId] = useState()
   const [messages, setMessages] = useState([
     { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
@@ -37,8 +42,9 @@ export default function ModernWeb3Chat() {
   const [isSidebarVisible, setIsSidebarVisible] = useState(true)
 
   const connectWallet = () => {
+    // connect(WALLET_NAME.)
     setIsWalletConnected(true)
-    setBalance("1.23") // Simulated balance
+    setBalance(2.3145699675435) // Simulated balance
   }
 
   const sendMessage = async () => {
@@ -69,6 +75,9 @@ export default function ModernWeb3Chat() {
         const data = await response.json();
         const content = data.response;
         console.log(content);
+        const tokenCount = data.token_count;
+        const tokenPrice = data.token_price;
+        setBalance(balance - tokenCount * tokenPrice);
         setMessages((prevMessages) => [
           ...prevMessages,
           { id: prevMessages.length + 1, content: content, sender: "assistant" },
@@ -185,7 +194,7 @@ export default function ModernWeb3Chat() {
                 <div className="bg-gray-50 p-3 rounded-md shadow-sm">
                   <p className="text-sm mb-1">
                     <span className="font-semibold text-gray-600">Balance:</span>{" "}
-                    <span className="font-bold text-gray-800">{balance} ETH</span>
+                    <span className="font-bold text-gray-800">{balance} APT</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-semibold text-gray-600">Model:</span>{" "}
@@ -194,7 +203,8 @@ export default function ModernWeb3Chat() {
                 </div>
               </>
             ) : (
-              <Button onClick={connectWallet} className="w-full">Connect Wallet</Button>
+              <WalletSelector />
+              // <Button onClick={connectWallet} className="w-full">Connect Wallet</Button>
             )}
           </div>
         </div>
