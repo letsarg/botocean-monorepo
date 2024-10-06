@@ -31,8 +31,6 @@ const models = [
 ]
 
 type Coin = { coin: { value: string } };
-const aptosConfig = new AptosConfig({ network: Network.CUSTOM });
-const aptos = new Aptos(aptosConfig);
 
 export default function ModernWeb3Chat() {
   const { autoConnect, setAutoConnect } = useAutoConnect();
@@ -51,6 +49,16 @@ export default function ModernWeb3Chat() {
   useEffect(() => {
     setAutoConnect(true);
   }, []);
+
+  let aptos: Aptos;
+  useEffect(() => {
+    if (network) {
+      (async () => {
+        const aptosConfig = new AptosConfig({ fullnode: network!.url! });
+        aptos = new Aptos(aptosConfig);
+      })();
+    }
+  }, [network])
 
   useEffect(() => {
     const getBalance = async () => {
@@ -176,7 +184,7 @@ export default function ModernWeb3Chat() {
                 <div className="bg-gray-50 p-3 rounded-md shadow-sm">
                   <p className="text-sm mb-1">
                     <span className="font-semibold text-gray-600">Balance: {balance}</span>{" "}
-                    <span className="font-bold text-gray-800">{ } APT</span>
+                    <span className="font-bold text-gray-800">{ } MOVE</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-semibold text-gray-600">Model:</span>{" "}
@@ -213,7 +221,7 @@ export default function ModernWeb3Chat() {
                       <div>
                         <h1 className="text-m font-semibold mb-2">Wallet balance</h1>
                         <div className="mb-4">
-                          <p className="text-sm font-medium">{balance} APT ({network?.name ?? ''})</p>
+                          <p className="text-sm font-medium">{balance} MOVE</p>
                         </div>
                       </div>
                       <div>
