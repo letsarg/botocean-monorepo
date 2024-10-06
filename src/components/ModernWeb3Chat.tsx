@@ -184,7 +184,7 @@ export default function ModernWeb3Chat() {
                 <div className="bg-gray-50 p-3 rounded-md shadow-sm">
                   <p className="text-sm mb-1">
                     <span className="font-semibold text-gray-600">Balance: {balance}</span>{" "}
-                    <span className="font-bold text-gray-800">{ } MOVE</span>
+                    <span className="font-bold text-gray-800">{ } BOTSO</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-semibold text-gray-600">Model:</span>{" "}
