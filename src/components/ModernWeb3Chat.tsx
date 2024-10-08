@@ -34,6 +34,7 @@ import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { isAptosNetwork } from '@aptos-labs/wallet-adapter-core';
 
 const models = [{ id: "qwen2:0.5b", name: "qwen2:0.5b" }];
 
@@ -48,8 +49,14 @@ export default function ModernWeb3Chat() {
   const [balance, setBalance] = useState(0);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useState([
-    { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
+    { id: 1, content: "Hello! How can I assist you today?", sender: "bot" , idHistory:1},
+    { id: 2, content: "Hello! How can I assist you today2?", sender: "user",idHistory:1 },
+    { id: 3, content: "Hello! How can I assist you today3?", sender: "user",idHistory:1 },{ id: 4, content: "Hello! How can I assist you today3?", sender: "bot" ,idHistory:1}, { id: 3, content: "Hello! How can I assist you today3?", sender: "user",idHistory:2 },{ id: 4, content: "Hello! How can I assist you today3?", sender: "bot" ,idHistory:2},
   ]);
+  const [messagesHistory, setMessagesHistory] = useState([
+    { id: 1, title: "Hello! How can I assist you today?" },{ id: 2, title: "Hello! How can I assist you today?" }
+  ]);
+  const [currentMessage, setcurrentMessage] = useState(1);
   const [inputMessage, setInputMessage] = useState("");
   const [selectedModel, setSelectedModel] = useState(models[0].name);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -91,7 +98,7 @@ export default function ModernWeb3Chat() {
     if (inputMessage.trim()) {
       setMessages([
         ...messages,
-        { id: messages.length + 1, content: inputMessage, sender: "user" },
+        { id: messages.length + 1, content: inputMessage, sender: "user" , idHistory:currentMessage },
       ]);
       setInputMessage("");
 
@@ -127,6 +134,7 @@ export default function ModernWeb3Chat() {
             id: prevMessages.length + 1,
             content: content,
             sender: "assistant",
+            idHistory:currentMessage
           },
         ]);
       } catch (error) {
@@ -136,9 +144,13 @@ export default function ModernWeb3Chat() {
   };
 
   const createNewChat = async () => {
-    setMessages([
-      { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
+    setMessagesHistory([...messagesHistory, 
+      { id: messagesHistory.length+1, title: "Hello! How can I assist you today2?", },
     ]);
+    setMessages([...messages, 
+      { id: messages.length+1, content: "Hello! How can I assist you today?",sender:'bot' , idHistory: messagesHistory.length+1},
+    ]);
+    setcurrentMessage(messagesHistory.length+1);
 
     const newChatData = {
       user_id: "111111", // replace with the actual user ID
@@ -191,15 +203,16 @@ export default function ModernWeb3Chat() {
             </Button>
           </div>
           <ScrollArea className="flex-grow">
-            {messages.map((message) => (
+            {messagesHistory.map((message) => (
               <div
+              onClick={()=>{setcurrentMessage(message.id)}}
                 key={message.id}
                 className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
               >
                 <div className="flex items-center space-x-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600 truncate">
-                    {message.content}
+                    {message.title}
                   </span>
                 </div>
               </div>
@@ -344,7 +357,7 @@ export default function ModernWeb3Chat() {
         {/* Chat messages */}
         <ScrollArea className="flex-1 p-4 scroll-area">
           <AnimatePresence>
-            {messages.map((message) => (
+            {messages.filter(item=>item.idHistory==currentMessage).map((message) =>  (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
