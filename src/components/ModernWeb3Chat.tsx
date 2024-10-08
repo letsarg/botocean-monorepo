@@ -1,50 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { MessageSquare, Send, Settings, Bot, User, Menu, PlusCircle, LogOut } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useWallet } from "@aptos-labs/wallet-adapter-react"
+} from "@/components/ui/select";
+import {
+  MessageSquare,
+  Send,
+  Settings,
+  Bot,
+  User,
+  Menu,
+  PlusCircle,
+  LogOut,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk"
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
-const models = [
-  { id: "qwen2:0.5b", name: "qwen2:0.5b" },
-]
+const models = [{ id: "qwen2:0.5b", name: "qwen2:0.5b" }];
 
 type Coin = { coin: { value: string } };
 
 export default function ModernWeb3Chat() {
   const { autoConnect, setAutoConnect } = useAutoConnect();
-  const { connect, disconnect, connected, wallet, account, network } = useWallet();
+  const { connect, disconnect, connected, wallet, account, network } =
+    useWallet();
 
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [balance, setBalance] = useState(0)
-  const [chatId, setChatId] = useState()
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [chatId, setChatId] = useState();
   const [messages, setMessages] = useState([
     { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
-  ])
-  const [inputMessage, setInputMessage] = useState("")
-  const [selectedModel, setSelectedModel] = useState(models[0].name)
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true)
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [selectedModel, setSelectedModel] = useState(models[0].name);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   useEffect(() => {
     setAutoConnect(true);
@@ -58,7 +66,7 @@ export default function ModernWeb3Chat() {
         aptos = new Aptos(aptosConfig);
       })();
     }
-  }, [network])
+  }, [network]);
 
   useEffect(() => {
     const getBalance = async () => {
@@ -68,40 +76,43 @@ export default function ModernWeb3Chat() {
             accountAddress: account!.address,
             resourceType: "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
           });
-          console.log(accountResource.coin.value)
+          console.log(accountResource.coin.value);
           setBalance(Number(accountResource.coin.value) / Math.pow(10, 8));
         } catch (error) {
-          console.error('Error fetching balance:', error);
+          console.error("Error fetching balance:", error);
         }
       }
-    }
+    };
 
     getBalance();
-  }, [account])
+  }, [account]);
 
   const sendMessage = async () => {
     if (inputMessage.trim()) {
-      setMessages([...messages, { id: messages.length + 1, content: inputMessage, sender: "user" }])
-      setInputMessage("")
+      setMessages([
+        ...messages,
+        { id: messages.length + 1, content: inputMessage, sender: "user" },
+      ]);
+      setInputMessage("");
 
       const newChatData = {
-        user_id: '111111',
+        user_id: "111111",
         chat_id: chatId,
         model: selectedModel,
-        prompt: inputMessage
-      }
+        prompt: inputMessage,
+      };
 
       try {
-        const response = await fetch('http://localhost:3001/prompt/ask', {
-          method: 'POST',
+        const response = await fetch("http://localhost:3001/prompt/ask", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(newChatData),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create new chat');
+          throw new Error("Failed to create new chat");
         }
 
         const data = await response.json();
@@ -112,49 +123,55 @@ export default function ModernWeb3Chat() {
         setBalance(balance - tokenCount * tokenPrice);
         setMessages((prevMessages) => [
           ...prevMessages,
-          { id: prevMessages.length + 1, content: content, sender: "assistant" },
-        ])
+          {
+            id: prevMessages.length + 1,
+            content: content,
+            sender: "assistant",
+          },
+        ]);
       } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
       }
     }
-  }
+  };
 
   const createNewChat = async () => {
-    setMessages([{ id: 1, content: "Hello! How can I assist you today?", sender: "bot" }])
+    setMessages([
+      { id: 1, content: "Hello! How can I assist you today?", sender: "bot" },
+    ]);
 
     const newChatData = {
-      user_id: '111111', // replace with the actual user ID
-      model: selectedModel,      // replace with the actual model type
+      user_id: "111111", // replace with the actual user ID
+      model: selectedModel, // replace with the actual model type
     };
 
     try {
-      const response = await fetch('http://localhost:3001/prompt/newChat', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/prompt/newChat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(newChatData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create new chat');
+        throw new Error("Failed to create new chat");
       }
 
       const data = await response.json();
-      setChatId(data.chat_id)
+      setChatId(data.chat_id);
       console.log(data); // New chat created successfully
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    const scrollArea = document.querySelector('.scroll-area')
+    const scrollArea = document.querySelector(".scroll-area");
     if (scrollArea) {
-      scrollArea.scrollTop = scrollArea.scrollHeight
+      scrollArea.scrollTop = scrollArea.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -162,17 +179,28 @@ export default function ModernWeb3Chat() {
       {isSidebarVisible && (
         <div className="w-64 bg-white border-r border-gray-200 hidden md:flex md:flex-col">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-700">Chat History</h2>
-            <Button variant="ghost" size="sm" onClick={() => setIsSidebarVisible(false)}>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Chat History
+            </h2>
+            <Button
+              className="hover:bg-slate-200"
+              size="sm"
+              onClick={() => setIsSidebarVisible(false)}
+            >
               <Menu className="h-4 w-4" />
             </Button>
           </div>
           <ScrollArea className="flex-grow">
             {messages.map((message) => (
-              <div key={message.id} className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+              <div
+                key={message.id}
+                className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+              >
                 <div className="flex items-center space-x-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600 truncate">{message.content}</span>
+                  <span className="text-sm text-gray-600 truncate">
+                    {message.content}
+                  </span>
                 </div>
               </div>
             ))}
@@ -183,12 +211,16 @@ export default function ModernWeb3Chat() {
               <>
                 <div className="bg-gray-50 p-3 rounded-md shadow-sm">
                   <p className="text-sm mb-1">
-                    <span className="font-semibold text-gray-600">Balance: {balance}</span>{" "}
-                    <span className="font-bold text-gray-800">{ } BOTSO</span>
+                    <span className="font-semibold text-gray-600">
+                      Balance: {balance}
+                    </span>{" "}
+                    <span className="font-bold text-gray-800">{} BOTSO</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-semibold text-gray-600">Model:</span>{" "}
-                    <span className="font-bold text-gray-800">{models.find(m => m.id === selectedModel)?.name}</span>
+                    <span className="font-bold text-gray-800">
+                      {models.find((m) => m.id === selectedModel)?.name}
+                    </span>
                   </p>
                 </div>
                 <Dialog>
@@ -204,8 +236,13 @@ export default function ModernWeb3Chat() {
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
                       <div>
-                        <h1 className="text-m font-semibold mb-2">Model selection</h1>
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <h1 className="text-m font-semibold mb-2">
+                          Model selection
+                        </h1>
+                        <Select
+                          value={selectedModel}
+                          onValueChange={setSelectedModel}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a model" />
                           </SelectTrigger>
@@ -219,21 +256,33 @@ export default function ModernWeb3Chat() {
                         </Select>
                       </div>
                       <div>
-                        <h1 className="text-m font-semibold mb-2">Wallet balance</h1>
+                        <h1 className="text-m font-semibold mb-2">
+                          Wallet balance
+                        </h1>
                         <div className="mb-4">
                           <p className="text-sm font-medium">{balance} MOVE</p>
                         </div>
                       </div>
                       <div>
-                        <h1 className="text-m font-semibold mb-2">Botsocean balance</h1>
+                        <h1 className="text-m font-semibold mb-2">
+                          Botsocean balance
+                        </h1>
                         <div className="mb-4">
                           <p className="text-sm font-medium">1 ETH</p>
                         </div>
                         <div className="flex space-x-2">
-                          <Button variant="outline" onClick={() => alert("Deposit functionality")} className="flex-1">
+                          <Button
+                            variant="outline"
+                            onClick={() => alert("Deposit functionality")}
+                            className="flex-1"
+                          >
                             Deposit
                           </Button>
-                          <Button variant="outline" onClick={() => alert("Withdraw functionality")} className="flex-1">
+                          <Button
+                            variant="outline"
+                            onClick={() => alert("Withdraw functionality")}
+                            className="flex-1"
+                          >
                             Withdraw
                           </Button>
                         </div>
@@ -241,7 +290,11 @@ export default function ModernWeb3Chat() {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button variant="outline" className="w-full mb-2" onClick={disconnect}>
+                <Button
+                  variant="outline"
+                  className="w-full mb-2"
+                  onClick={disconnect}
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
@@ -261,7 +314,11 @@ export default function ModernWeb3Chat() {
         <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {!isSidebarVisible && (
-              <Button variant="ghost" size="sm" onClick={() => setIsSidebarVisible(true)}>
+              <Button
+                className="hover:bg-slate-200"
+                size="sm"
+                onClick={() => setIsSidebarVisible(true)}
+              >
                 <Menu className="h-4 w-4" />
               </Button>
             )}
@@ -297,10 +354,11 @@ export default function ModernWeb3Chat() {
                 className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
               >
                 <div
-                  className={`max-w-sm rounded-lg p-4 ${message.sender === "user"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-800 border border-gray-200"
-                    }`}
+                  className={`max-w-sm rounded-lg p-4 ${
+                    message.sender === "user"
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-800 border border-gray-200"
+                  }`}
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     {message.sender === "user" ? (
@@ -308,7 +366,9 @@ export default function ModernWeb3Chat() {
                     ) : (
                       <Bot className="w-4 h-4" />
                     )}
-                    <span className="font-semibold">{message.sender === "user" ? "You" : "AI"}</span>
+                    <span className="font-semibold">
+                      {message.sender === "user" ? "You" : "AI"}
+                    </span>
                   </div>
                   {message.content}
                 </div>
@@ -326,7 +386,7 @@ export default function ModernWeb3Chat() {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              className="flex-1"
+              className="flex-1 text-black"
             />
             <Button onClick={sendMessage}>
               <Send className="w-4 h-4 mr-2" />
@@ -336,5 +396,5 @@ export default function ModernWeb3Chat() {
         </div>
       </div>
     </div>
-  )
+  );
 }
