@@ -6,16 +6,16 @@ import { Network, Platform } from 'src/enum';
 export class AppConfigService {
   readonly port: number;
   readonly db_connection: string;
-  readonly quic: QuicConfig;
+  readonly hub: HubConfig;
 
   constructor(configService: ConfigService) {
     this.port = configService.get<number>('app.port');
     this.db_connection = configService.get<string>('app.db_connection');
-    this.quic = new QuicConfig(configService);
+    this.hub = new HubConfig(configService);
   }
 }
 
-export class QuicConfig {
+export class HubConfig {
   privkey_path: string;
   pubkey_path: string;
   cert_path: string;
@@ -25,14 +25,14 @@ export class QuicConfig {
 
   constructor(configService: ConfigService) {
     this.privkey_path = configService.get<string>(
-      'app.quic.privkey_path',
+      'app.hub.privkey_path',
     );
-    this.pubkey_path = configService.get<string>('app.quic.pubkey_path');
+    this.pubkey_path = configService.get<string>('app.hub.pubkey_path');
     this.cert_path = configService.get<string>(
-      'app.quic.cert_path',
+      'app.hub.cert_path',
     );
-    this.rootca_cert_path = configService.get<string>('app.quic.rootca_cert_path');
-    this.host = configService.get<string>('app.quic.host');
-    this.port = configService.get<number>('app.quic.port');
+    this.rootca_cert_path = configService.get<string>('app.hub.rootca_cert_path');
+    this.host = configService.get<string>('app.hub.host');
+    this.port = configService.get<number>('app.hub.port');
   }
 }

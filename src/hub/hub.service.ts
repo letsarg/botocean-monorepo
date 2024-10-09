@@ -17,9 +17,9 @@ export class HubService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const privateKey = fs.readFileSync(this.appConfig.quic.privkey_path, 'utf8');
-    const publicKey = fs.readFileSync(this.appConfig.quic.pubkey_path, 'utf8');
-    const certRSAPEM = fs.readFileSync(this.appConfig.quic.cert_path, 'utf8');
+    const privateKey = fs.readFileSync(this.appConfig.hub.privkey_path, 'utf8');
+    const publicKey = fs.readFileSync(this.appConfig.hub.pubkey_path, 'utf8');
+    const certRSAPEM = fs.readFileSync(this.appConfig.hub.cert_path, 'utf8');
     const keyPairRSAPEM = {
       publicKey,
       privateKey
@@ -39,8 +39,8 @@ export class HubService implements OnModuleInit {
       logger: logger.getChild('socket'),
     });
     await this.quicSocket.start({
-      host: this.appConfig.quic.host,
-      port: this.appConfig.quic.port,
+      host: this.appConfig.hub.host,
+      port: this.appConfig.hub.port,
     });
     this.quicServer = new QUICServer({
       logger: logger.getChild(QUICServer.name),
@@ -72,8 +72,8 @@ export class HubService implements OnModuleInit {
       }
     );
     await this.quicServer.start({
-      host: this.appConfig.quic.host,
-      port: this.appConfig.quic.port,
+      host: this.appConfig.hub.host,
+      port: this.appConfig.hub.port,
     })
 
     setTimeout(async () => {
@@ -87,8 +87,8 @@ export class HubService implements OnModuleInit {
         ),
       ]);
       const client = await QUICClient.createQUICClient({
-        host: this.appConfig.quic.host,
-        port: this.appConfig.quic.port,
+        host: this.appConfig.hub.host,
+        port: this.appConfig.hub.port,
         localHost: '::',
         crypto: {
           ops: clientCryptoOps,
