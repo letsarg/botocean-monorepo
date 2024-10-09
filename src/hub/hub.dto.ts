@@ -1,5 +1,3 @@
-import { ModelResponse } from "ollama"
-
 export class HubMessage {
   type: HubMessageType
 

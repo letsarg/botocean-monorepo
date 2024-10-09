@@ -10,6 +10,7 @@ import { ProviderService } from 'src/provider/provider.service';
 
 @Injectable()
 export class HubService implements OnModuleInit {
+  private logger = new Logger(HubService.name);
   private quicSocket: QUICSocket;
   private quicServer: QUICServer;
   private quicLogger;
@@ -61,7 +62,11 @@ export class HubService implements OnModuleInit {
     this.quicServer.addEventListener(
       events.EventQUICServerConnection.name,
       async (e: events.EventQUICServerConnection) => {
-        await this.handleConnection(e);
+        try {
+          await this.handleConnection(e);
+        } catch (error) {
+          this.logger.error(`handle conn failed: ${error}`);
+        }
       }
     );
     await this.quicServer.start({
@@ -90,7 +95,6 @@ export class HubService implements OnModuleInit {
     }
 
     let providerInst = new ProviderInstance();
-    // TODO: use the actual provider id
     providerInst.id = res.providerInfoRes.providerId;
     providerInst.providerInfo = res.providerInfoRes
     providerInst.quicConn = conn;
