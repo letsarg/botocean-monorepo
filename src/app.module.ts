@@ -10,6 +10,7 @@ import { AppConfigModule } from './app-config/app-config.module';
 import { DatabaseModule } from './database/database.module';
 import { PromptModule } from './prompt/prompt.module';
 import { ProviderModule } from './provider/provider.module';
+import { HubModule } from './hub/hub.module';
 
 @Module({
   imports: [
@@ -22,20 +23,21 @@ import { ProviderModule } from './provider/provider.module';
       ],
       isGlobal: true,
     }),
-    MongooseModule.forRootAsync({
-      imports: [AppConfigModule],
-      useFactory: async (configService: AppConfigService) => ({
-        uri: configService.db_connection,
-      }),
-      inject: [AppConfigService],
-    }),
-    MongooseModule.forFeature([
-      // { name: BotProcess.name, schema: BotProcessSchema },
-    ]),
+    // MongooseModule.forRootAsync({
+    //   imports: [AppConfigModule],
+    //   useFactory: async (configService: AppConfigService) => ({
+    //     uri: configService.db_connection,
+    //   }),
+    //   inject: [AppConfigService],
+    // }),
+    // MongooseModule.forFeature([
+    //   // { name: BotProcess.name, schema: BotProcessSchema },
+    // ]),
     AppConfigModule,
-    DatabaseModule,
+    // DatabaseModule,
     PromptModule,
     ProviderModule,
+    HubModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],
