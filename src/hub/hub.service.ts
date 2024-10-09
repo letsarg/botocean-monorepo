@@ -1,11 +1,12 @@
-import { ClientCryptoOps, events, QUICClient, QUICServer, QUICSocket, ServerCryptoOps } from '@matrixai/quic';
+import { events, QUICServer, QUICSocket, ServerCryptoOps } from '@matrixai/quic';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import Logger, { LogLevel, StreamHandler, formatting } from '@matrixai/logger';
 import * as testsUtils from './utils';
 import * as fs from "fs"
-import { ApplicationConfig } from '@nestjs/core';
 import { AppConfigService } from 'src/app-config/app-config.service';
-import { promise } from './utils';
+import { HubMessage, HubMessageType } from './hub.dto';
+import { ProviderInstance } from 'src/provider/provider-instance.dto';
+import { ProviderService } from 'src/provider/provider.service';
 
 @Injectable()
 export class HubService implements OnModuleInit {
@@ -13,7 +14,10 @@ export class HubService implements OnModuleInit {
   private quicServer: QUICServer;
   private quicLogger;
 
-  constructor(private appConfig: AppConfigService) {
+  constructor(
+    private appConfig: AppConfigService,
+    private providerService: ProviderService,
+  ) {
   }
 
   async onModuleInit() {
@@ -57,55 +61,46 @@ export class HubService implements OnModuleInit {
     this.quicServer.addEventListener(
       events.EventQUICServerConnection.name,
       async (e: events.EventQUICServerConnection) => {
-        const conn = e.detail
-        conn.addEventListener(
-          events.EventQUICConnectionStream.name,
-          async (streamEvent: events.EventQUICConnectionStream) => {
-            const stream = streamEvent.detail;
-            const decoder = new TextDecoder('utf-8');
-            for await (const msg of stream.readable) {
-              const str = decoder.decode(msg);
-              console.log(`msg from client: ${str}`)
-            }
-          },
-        );
+        await this.handleConnection(e);
       }
     );
     await this.quicServer.start({
       host: this.appConfig.hub.host,
       port: this.appConfig.hub.port,
     })
+  }
 
-    setTimeout(async () => {
-      console.log('connecting to quic server');
-      const clientCryptoOps: ClientCryptoOps = {
-        randomBytes: testsUtils.randomBytes,
-      };
-      const logger = new Logger(`${QUICClient.name} Test`, LogLevel.INFO, [
-        new StreamHandler(
-          formatting.format`${formatting.level}: ${formatting.keys}: ${formatting.msg}`,
-        ),
-      ]);
-      const client = await QUICClient.createQUICClient({
-        host: this.appConfig.hub.host,
-        port: this.appConfig.hub.port,
-        localHost: '::',
-        crypto: {
-          ops: clientCryptoOps,
-        },
-        logger: logger.getChild(QUICClient.name),
-        config: {
-          verifyPeer: false,
-        },
-      });
-      console.log('created quic client');
+  private async handleConnection(e: events.EventQUICServerConnection) {
+    const conn = e.detail
 
-      const stream = client.connection.newStream();
-      const writer = stream.writable.getWriter();
-      const str = "Hello from client";
-      const encoder = new TextEncoder();
-      const uint8Array = encoder.encode(str);
-      await writer.write(uint8Array);
-    }, 4000);
+    // stream to get provider info
+    const stream = conn.newStream();
+    const writer = stream.writable.getWriter();
+    const req: HubMessage = {
+      type: HubMessageType.ProviderInfoReq,
+    }
+    const encoder = new TextEncoder();
+    const encReq = encoder.encode(JSON.stringify(req));
+    await writer.write(encReq)
+    let res: HubMessage;
+    const decoder = new TextDecoder('utf-8');
+    for await (const encRes of stream.readable) {
+      res = JSON.parse(decoder.decode(encRes));
+      break;
+    }
+
+    let providerInst = new ProviderInstance();
+    // TODO: use the actual provider id
+    providerInst.id = res.providerInfoRes.providerId;
+    providerInst.providerInfo = res.providerInfoRes
+    providerInst.quicConn = conn;
+    this.providerService.registerProvider(providerInst);
+
+    conn.addEventListener(events.EventQUICConnectionClose.name, () => {
+      this.providerService.deregisterProvider(providerInst.id)
+    })
+    conn.addEventListener(events.EventQUICConnectionError.name, () => {
+      this.providerService.deregisterProvider(providerInst.id)
+    })
   }
 }

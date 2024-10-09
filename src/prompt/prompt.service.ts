@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ChatContent, ChatInfo, ModelType, NewChatResDto, UserChat } from './prompt.dto';
 import { ProviderService } from 'src/provider/provider.service';
-import { Provider } from 'src/provider/provider.dto';
+import { ProviderInstance } from 'src/provider/provider-instance.dto';
 import { OllamaService } from 'src/provider/ollama/ollama.service';
 import { v4 as uuidv4 } from 'uuid';
+import { ProviderType } from 'src/hub/hub.dto';
 
 const TOKEN_PRICE = 0.00000000000001;
 
@@ -21,12 +22,6 @@ export class PromptService {
   constructor(
     private providerService: ProviderService,
   ) {
-    // mock providers
-    const provider: Provider = {
-      id: "hehe",
-      model: ModelType.Qwen2_05b,
-    };
-    this.providerService.registerProvider(provider)
   }
 
   async newChat(user_id: string, model: ModelType): Promise<NewChatResDto> {
@@ -77,17 +72,17 @@ export class PromptService {
     }
 
     // take the first
-    let provider = providers[0];
+    let provider = this.providerService.findProvidersByModel(model)[0];
     let response: string;
-    let totalTokenCount= 0;
-    switch (provider.model) {
-      case ModelType.Qwen2_05b:
+    let totalTokenCount = 0;
+    switch (provider.providerInfo.providerType) {
+      case ProviderType.Ollama:
         let chatService = new OllamaService();
         let content: ChatContent = {
           role: 'user',
           content: prompt,
         }
-        let res = await chatService.chat(provider.model, content, chatHistories);
+        let res = await chatService.chat(model, content, chatHistories);
         response = res.message.content
         totalTokenCount = res.prompt_eval_count + res.eval_count;
 
@@ -99,11 +94,8 @@ export class PromptService {
         this.chatHistories.set(chatId, [...chatHistories, content, assistantContent]);
         break;
       default:
-        break;
+        throw new Error(`platform is not supported yet ${provider.providerInfo.providerType}`)
     }
-
-    const tokenCount = this.calculateTokenCount(prompt);
-    const tokenPrice = this.calculateTokenPrice(tokenCount);
 
     return {
       user_id: userId,
@@ -113,16 +105,5 @@ export class PromptService {
       token_count: totalTokenCount,
       token_price: TOKEN_PRICE,
     };
-  }
-
-  private calculateTokenCount(prompt: string): number {
-    // Example calculation for token count (could be based on prompt length)
-    return prompt.length; // Simple assumption: 1 token per character
-  }
-
-  private calculateTokenPrice(tokenCount: number): number {
-    // Example calculation for token price
-    const pricePerToken = 0.0005; // Adjust this price per token as needed
-    return tokenCount * pricePerToken;
   }
 }

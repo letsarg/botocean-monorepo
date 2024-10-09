@@ -1,29 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { ModelType } from 'src/prompt/prompt.dto';
-import { Provider } from './provider.dto';
+import { ProviderInstance } from './provider-instance.dto';
+import { ProviderType } from 'src/hub/hub.dto';
 
 @Injectable()
 export class ProviderService {
   // Maps provider ID to a Provider instance
-  private providerMap: Map<string, Provider> = new Map();
+  private providerMap: Map<string, ProviderInstance> = new Map();
 
   // Maps model type to an array of provider IDs
-  private modelProviderMap: Map<ModelType, string[]> = new Map();
+  private modelProviderMap: Map<string, Set<string>> = new Map();
 
   // Registers a provider
-  registerProvider(provider: Provider) {
+  registerProvider(provider: ProviderInstance) {
+    let models: string[];
+    switch (provider.providerInfo.providerType) {
+      case ProviderType.Ollama:
+        models = provider.providerInfo.ollamaProviderDetail.models;
+        break;
+      default:
+        throw new Error(`unsupported provider ${provider.providerInfo.providerType}`);
+    }
+
+    // Add to provider map list
     this.providerMap.set(provider.id, provider);
 
-    // Get the current array of provider IDs for this model
-    let providerIds = this.modelProviderMap.get(provider.model);
-    if (!providerIds) {
-      // Initialize if no providers for this model type exist yet
-      providerIds = [];
-      this.modelProviderMap.set(provider.model, providerIds);
-    }
-    // Check if the provider ID already exists in the model's provider array
-    if (!providerIds.includes(provider.id)) {
-      providerIds.push(provider.id);
+    // Add provider to map of model -> providers
+    for (let index = 0; index < models.length; index++) {
+      const model = models[index];
+      let providerIds = this.modelProviderMap.get(model);
+      if (!providerIds) {
+        providerIds = new Set();
+      }
+      providerIds.add(provider.id);
+      this.modelProviderMap.set(model, providerIds);
     }
   }
 
@@ -35,37 +45,45 @@ export class ProviderService {
       throw new Error(`Provider with ID ${providerId} not found`);
     }
 
+    let models: string[];
+    switch (provider.providerInfo.providerType) {
+      case ProviderType.Ollama:
+        models = provider.providerInfo.ollamaProviderDetail.models;
+        break;
+      default:
+        throw new Error(`unsupported provider ${provider.providerInfo.providerType}`);
+    }
+
     // Remove the provider from provider map
     this.providerMap.delete(providerId);
 
-    // Get the array of provider IDs for the model
-    const providerIds = this.modelProviderMap.get(provider.model);
-
-    if (providerIds) {
-      // Filter out the provider ID
-      const updatedProviderIds = providerIds.filter((id) => id !== providerId);
-
-      if (updatedProviderIds.length === 0) {
-        // Remove the model entry if no more providers exist for this model
-        this.modelProviderMap.delete(provider.model);
-      } else {
-        // Otherwise, update the model's provider ID array
-        this.modelProviderMap.set(provider.model, updatedProviderIds);
+    // Unset all provider ids from models
+    for (let index = 0; index < models.length; index++) {
+      const model = models[index];
+      let providerIds = this.modelProviderMap.get(model);
+      if (providerIds) {
+        providerIds.delete(provider.id);
+        if (providerIds.values.length > 0) {
+          this.modelProviderMap.set(model, providerIds);
+        } else {
+          this.modelProviderMap.delete(model);
+        }
       }
     }
   }
 
-  findProvidersByModel(model: ModelType): Provider[] {
+  findProvidersByModel(model: string): ProviderInstance[] {
     // Get the list of provider IDs for the model
     const providerIds = this.modelProviderMap.get(model);
 
-    if (!providerIds || providerIds.length === 0) {
+    if (!providerIds || providerIds.values.length === 0) {
       return []; // No providers found for this model
     }
 
-    // Retrieve the Provider instances from providerMap
-    return providerIds
-      .map((id) => this.providerMap.get(id))
-      .filter((provider): provider is Provider => provider !== undefined);
+    let insts: ProviderInstance[] = [];
+    for (const providerId of providerIds.values()) {
+      insts.push(this.providerMap.get(providerId))
+    }
+    return insts;
   }
 }
