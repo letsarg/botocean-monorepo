@@ -8,6 +8,9 @@ cd keys/
 # Create unencrypted private key and a CSR (certificate signing request)
 openssl req -newkey rsa:2048 -nodes -subj "/C=FI/CN=vahid" -keyout key.pem -out key.csr
 
+# Create pub key from private key
+openssl rsa -in key.pem -pubout -out pubkey.pem
+
 # Create self-signed certificate (`cert.pem`) with the private key and CSR
 openssl x509 -signkey key.pem -in key.csr -req -days 365 -out cert.pem
 
@@ -22,7 +25,7 @@ basicConstraints=CA:FALSE
 subjectAltName = @alt_names
 [alt_names]
 DNS.1 = server
-IP.1 = 192.168.64.1
+IP.1 = 127.0.0.1
 EOF
 
 # Sign the CSR (`cert.pem`) with the root CA certificate and private key

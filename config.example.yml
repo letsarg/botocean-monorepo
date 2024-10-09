@@ -1,4 +1,8 @@
 app:
-  port: 3000
+  port: 3001
   db_connection: "mongodb://localhost:27017/money_printer"
-
+  quic:
+    privkey_path: keys/key.pem
+    pubkey_path: keys/pubkey.pem
+    cert_path: keys/cert.pem
+    rootca_cert_path: keys/rootCA.crt

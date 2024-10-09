@@ -26,6 +26,8 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/mongoose": "^10.0.10",
     "@nestjs/platform-express": "^10.0.0",
+    "@peculiar/webcrypto": "^1.5.0",
+    "@peculiar/x509": "^1.12.3",
     "@quicknode/sdk": "^2.3.0",
     "axios": "^1.7.6",
     "ethers": "^6.13.2",
