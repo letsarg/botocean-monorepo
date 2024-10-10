@@ -11,16 +11,16 @@ services:
     volumes:
       - ./config.yml:/usr/src/app/config.yml
 
-  mongodb:
-    image: mongo:6.0
-    container_name: mongodb
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_DATABASE: money_printer
-    volumes:
-      - mongo_data:/data/db
-    restart: always
+  # mongodb:
+  #   image: mongo:6.0
+  #   container_name: mongodb
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     MONGO_INITDB_DATABASE: money_printer
+  #   volumes:
+  #     - mongo_data:/data/db
+  #   restart: always
 
 volumes:
   mongo_data:
