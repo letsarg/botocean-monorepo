@@ -96,6 +96,7 @@ export class HubService implements OnModuleInit {
       res = JSON.parse(decoder.decode(encRes));
       break;
     }
+    await stream.destroy()
 
     let providerInst = new ProviderInstance();
     providerInst.id = res.providerInfoRes.providerId;
@@ -103,10 +104,6 @@ export class HubService implements OnModuleInit {
     providerInst.quicConn = conn;
     this.connIdToProvider.set(connId, providerInst)
     this.providerService.registerProvider(providerInst);
-
-    // setTimeout(async () => {
-    //   providerInst.quicConn.newStream();
-    // }, 10);
 
     conn.addEventListener(events.EventQUICConnectionClose.name, (e: events.EventQUICConnectionClose) => {
       this.providerService.deregisterProvider(providerInst.id)

@@ -41,21 +41,13 @@ export class ChatgptProviderDetail {
 
 export class OllamaChatReq {
   model: string
-  messages: {
-    role: string
-    content: string
-    images?: Uint8Array[] | string[];
-  }[]
+  messages: Message[]
 }
 
 export class OllamaChatRes {
   model: string;
   created_at: Date;
-  message: {
-    role: string
-    content: string
-    images?: Uint8Array[] | string[];
-  };
+  message: Message;
   done: boolean;
   done_reason: string;
   total_duration: number;
@@ -64,6 +56,12 @@ export class OllamaChatRes {
   prompt_eval_duration: number;
   eval_count: number;
   eval_duration: number;
+}
+
+export class Message {
+  role: string
+  content: string
+  images?: Uint8Array[] | string[];
 }
 
 export class Provider {

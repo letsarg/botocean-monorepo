@@ -8,10 +8,10 @@ export class ProviderService {
   private logger = new Logger(ProviderService.name);
 
   // Maps provider ID to a Provider instance
-  private providerMap: Map<string, ProviderInstance> = new Map();
+  providerMap: Map<string, ProviderInstance> = new Map();
 
   // Maps model type to an array of provider IDs
-  private modelProviderMap: Map<string, Set<string>> = new Map();
+  modelProviderMap: Map<string, Set<string>> = new Map();
 
   // Registers a provider
   registerProvider(provider: ProviderInstance) {
@@ -37,8 +37,10 @@ export class ProviderService {
         providerIds = new Set();
       }
       providerIds.add(provider.id);
-      this.modelProviderMap.set(model, providerIds);
+      this.modelProviderMap = this.modelProviderMap.set(model, providerIds);
     }
+
+    console.log(this.modelProviderMap)
   }
 
   // Deregisters a provider by providerId
@@ -70,7 +72,7 @@ export class ProviderService {
       if (providerIds) {
         providerIds.delete(provider.id);
         if (providerIds.values.length > 0) {
-          this.modelProviderMap.set(model, providerIds);
+          this.modelProviderMap = this.modelProviderMap.set(model, providerIds);
         } else {
           this.modelProviderMap.delete(model);
         }

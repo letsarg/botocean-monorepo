@@ -1,17 +1,17 @@
 export class NewChatDto {
   user_id: string;
-  model: ModelType;
+  model: string;
 }
 
 export class NewChatResDto {
   chat_id: string;
-  model: ModelType;
+  model: string;
 }
 
 export class CreatePromptDto {
   user_id: string;
   chat_id: string;
-  model: ModelType;
+  model: string;
   prompt: string;
 }
 
@@ -23,7 +23,7 @@ export class ChatContent {
 export class ChatInfo {
   chatId: string;
   chatTitle?: string;
-  model: ModelType;
+  model: string;
 }
 
 export class UserChat {

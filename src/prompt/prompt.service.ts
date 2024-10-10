@@ -4,7 +4,7 @@ import { ProviderService } from 'src/provider/provider.service';
 import { ProviderInstance } from 'src/provider/provider-instance.dto';
 import { OllamaService } from 'src/provider/ollama/ollama.service';
 import { v4 as uuidv4 } from 'uuid';
-import { ProviderType } from 'src/hub/hub.dto';
+import { Message, ProviderType } from 'src/hub/hub.dto';
 
 const TOKEN_PRICE = 0.00000000000001;
 
@@ -17,14 +17,14 @@ export class PromptService {
   /// chatId
   private chatInfos: Map<string, ChatInfo> = new Map();
   /// chatId -> 
-  private chatHistories: Map<string, ChatContent[]> = new Map();
+  private chatHistories: Map<string, Message[]> = new Map();
 
   constructor(
     private providerService: ProviderService,
   ) {
   }
 
-  async newChat(user_id: string, model: ModelType): Promise<NewChatResDto> {
+  async newChat(user_id: string, model: string): Promise<NewChatResDto> {
     const chatId = uuidv4();
 
     // Initialize an empty array of chat messages for this chat
@@ -41,13 +41,9 @@ export class PromptService {
     return response;
   }
 
-  async processPrompt(userId: string, chatId: string, model: ModelType, prompt: string) {
+  async processPrompt(userId: string, chatId: string, model: string, prompt: string) {
     if (!this.chatInfos.get(chatId)) {
       throw new Error('Unexisting chatId');
-    }
-
-    if (!Object.values(ModelType).includes(model)) {
-      throw new Error('Invalid model type');
     }
 
     // update model changes
@@ -66,6 +62,8 @@ export class PromptService {
     let chatHistories = this.chatHistories.get(chatId);
     console.log(chatHistories);
 
+    console.log(this.providerService.modelProviderMap);
+    console.log(model);
     let providers = this.providerService.findProvidersByModel(model);
     if (providers.length == 0) {
       throw new Error('No providers for model found');
@@ -77,21 +75,25 @@ export class PromptService {
     let totalTokenCount = 0;
     switch (provider.providerInfo.providerType) {
       case ProviderType.Ollama:
-        let chatService = new OllamaService();
-        let content: ChatContent = {
-          role: 'user',
-          content: prompt,
-        }
-        let res = await chatService.chat(model, content, chatHistories);
-        response = res.message.content
-        totalTokenCount = res.prompt_eval_count + res.eval_count;
+        const messages: Message[] = [
+          ...chatHistories,
+          {
+            role: 'user',
+            content: prompt,
+          }
+        ]
+        const res = await provider.chat(model, messages);
+        response = res.ollamaChatRes.message.content
+        totalTokenCount = res.ollamaChatRes.prompt_eval_count + res.ollamaChatRes.eval_count;
 
         // save message to history
-        let assistantContent: ChatContent = {
+        let assistantMsg: Message = {
           role: 'assistant',
           content: response,
         }
-        this.chatHistories.set(chatId, [...chatHistories, content, assistantContent]);
+        this.chatHistories.set(chatId, [
+          ...messages, assistantMsg
+        ]);
         break;
       default:
         throw new Error(`platform is not supported yet ${provider.providerInfo.providerType}`)
