@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ModelType } from 'src/prompt/prompt.dto';
 import { ProviderInstance } from './provider-instance.dto';
 import { ProviderType } from 'src/hub/hub.dto';
 
 @Injectable()
 export class ProviderService {
+  private logger = new Logger(ProviderService.name);
+
   // Maps provider ID to a Provider instance
   private providerMap: Map<string, ProviderInstance> = new Map();
 
@@ -13,6 +15,8 @@ export class ProviderService {
 
   // Registers a provider
   registerProvider(provider: ProviderInstance) {
+    this.logger.log(`Registering providerId: ${provider.id}`);
+
     let models: string[];
     switch (provider.providerInfo.providerType) {
       case ProviderType.Ollama:
@@ -39,6 +43,8 @@ export class ProviderService {
 
   // Deregisters a provider by providerId
   deregisterProvider(providerId: string) {
+    this.logger.log(`Deregistering providerId: ${providerId}`);
+
     // Get the provider from the provider map
     const provider = this.providerMap.get(providerId);
     if (!provider) {
