@@ -15,6 +15,8 @@ export class HubService implements OnModuleInit {
   private quicServer: QUICServer;
   private quicLogger;
 
+  private connIdToProvider: Map<string, ProviderInstance> = new Map();
+
   constructor(
     private appConfig: AppConfigService,
     private providerService: ProviderService,
@@ -35,7 +37,7 @@ export class HubService implements OnModuleInit {
       sign: testsUtils.signHMAC,
       verify: testsUtils.verifyHMAC,
     };
-    const logger = new Logger(`${QUICServer.name} Test`, LogLevel.INFO, [
+    const logger = new Logger(`${QUICServer.name}`, LogLevel.INFO, [
       new StreamHandler(
         formatting.format`${formatting.level}:${formatting.keys}:${formatting.msg}`,
       ),
@@ -77,6 +79,7 @@ export class HubService implements OnModuleInit {
 
   private async handleConnection(e: events.EventQUICServerConnection) {
     const conn = e.detail
+    const connId = conn.connectionId.toString();
 
     // stream to get provider info
     const stream = conn.newStream();
@@ -98,12 +101,14 @@ export class HubService implements OnModuleInit {
     providerInst.id = res.providerInfoRes.providerId;
     providerInst.providerInfo = res.providerInfoRes
     providerInst.quicConn = conn;
+    this.connIdToProvider.set(connId, providerInst)
     this.providerService.registerProvider(providerInst);
 
-    conn.addEventListener(events.EventQUICConnectionClose.name, () => {
-      this.providerService.deregisterProvider(providerInst.id)
-    })
-    conn.addEventListener(events.EventQUICConnectionError.name, () => {
+    // setTimeout(async () => {
+    //   providerInst.quicConn.newStream();
+    // }, 10);
+
+    conn.addEventListener(events.EventQUICConnectionClose.name, (e: events.EventQUICConnectionClose) => {
       this.providerService.deregisterProvider(providerInst.id)
     })
   }
