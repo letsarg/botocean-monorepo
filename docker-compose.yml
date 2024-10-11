@@ -6,11 +6,13 @@ services:
     restart: always
     ports:
       - "3000:3000"
-      - "4433:4433"
+      - "4433:4433/tcp"
+      - "4433:4433/udp"
     # depends_on:
       # - mongodb
     volumes:
       - ./config.yml:/usr/src/app/config.yml
+      - ./keys:/usr/src/app/keys
 
   # mongodb:
   #   image: mongo:6.0
