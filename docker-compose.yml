@@ -2,8 +2,6 @@ services:
   redis:
     image: redis
     container_name: redis
-    command: >
-      --requirepass ${REDIS_PASSWORD}
     volumes:
       - ../redis-data:/data
   botsocean:

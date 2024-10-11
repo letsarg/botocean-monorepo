@@ -11,7 +11,10 @@ export class UserService {
   private redisClient: Redis;
 
   constructor(private readonly jwtService: JwtService) {
-    this.redisClient = new Redis();
+    this.redisClient = new Redis({
+      host: "redis",
+      port: 6379
+    });
   }
     
   private message = 'Sign this message to log in';
