@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Network, Platform } from 'src/enum';
 
 @Injectable()
 export class AppConfigService {
   readonly port: number;
-  readonly redisUrl: string;
-  readonly db_connection: string;
+  readonly redis_host: string;
+  readonly redis_port: number;
   readonly hub: HubConfig;
 
   constructor(configService: ConfigService) {
     this.port = configService.get<number>('app.port');
-    this.redisUrl = configService.get<string>('app.redis_url');
-    this.db_connection = configService.get<string>('app.db_connection');
+    this.redis_host = configService.get<string>('app.redis_host');
+    this.redis_port = configService.get<number>('app.redis_port');
     this.hub = new HubConfig(configService);
   }
 }

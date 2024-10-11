@@ -13,11 +13,11 @@ export class UserService {
 
   constructor(private readonly jwtService: JwtService, readonly appConfig: AppConfigService) {
     this.redisClient = new Redis({
-      host: appConfig.redisUrl,
-      port: 6379
+      host: appConfig.redis_host,
+      port: appConfig.redis_port,
     });
   }
-    
+
   private message = 'Sign this message to log in';
 
   async findUserByWallet(wallet: string): Promise<User | null> {

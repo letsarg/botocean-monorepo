@@ -1,6 +1,7 @@
 app:
-  port: 3001
-  redis_url: redis
+  port: 4431
+  redis_host: localhost
+  redis_port: 6379
   hub:
     privkey_path: keys/key.pem
     pubkey_path: keys/pubkey.pem
