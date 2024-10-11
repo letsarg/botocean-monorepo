@@ -8,6 +8,7 @@ import { AppConfigService } from './app-config/app-config.service';
 import { AppConfigModule } from './app-config/app-config.module';
 import { ProviderModule } from './provider/provider.module';
 import { HubModule } from './hub/hub.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { HubModule } from './hub/hub.module';
     AppConfigModule,
     ProviderModule,
     HubModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],
