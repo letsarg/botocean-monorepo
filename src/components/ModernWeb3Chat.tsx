@@ -185,9 +185,9 @@ export default function ModernWeb3Chat() {
       }
     }
   };
-  const getUserChatDetail = async (chatId: string) => {
+  const getUserChatDetail = async (chatId: number) => {
     try {
-      var response = await chatService.getUserChatDetail(chatId);
+      var response = await chatService.getUserChatDetail(chatId.toString());
       if (response.status === 200 || response.status === 201) {
         setMessages(response.data);
       }
@@ -236,8 +236,11 @@ export default function ModernWeb3Chat() {
       console.error("Error:", error);
     }
   };
-
   useEffect(() => {
+    getModel();
+  }, [])
+  useEffect(() => {
+
     const scrollArea = document.querySelector(".scroll-area");
     if (scrollArea) {
       scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -265,6 +268,7 @@ export default function ModernWeb3Chat() {
             {messagesHistory.map((message) => (
               <div
                 onClick={() => {
+                  getUserChatDetail(message.id);
                   setcurrentMessage(message.id);
                 }}
                 key={message.id}
