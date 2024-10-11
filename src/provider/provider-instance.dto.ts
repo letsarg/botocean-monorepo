@@ -15,8 +15,8 @@ export class ProviderInstance {
     let req: HubMessage = {
       type: HubMessageType.ProviderInfoReq,
     }
-    await this.writeTo(stream, req);
-    let res = await this.readFrom(stream);
+    await writeTo(stream, req);
+    let res = await readFrom(stream);
     await stream.destroy()
     this.id = res.providerInfoRes.providerId;
     this.providerInfo = res.providerInfoRes;
@@ -34,52 +34,54 @@ export class ProviderInstance {
         messages
       }
     }
-    await this.writeTo(stream, hubMsg);
-    let res = await this.readFrom(stream);
+    await writeTo(stream, hubMsg);
+    let res = await readFrom(stream);
 
     await stream.destroy()
     return res;
   }
 
-  private async writeTo(stream: QUICStream, msg: HubMessage) {
-    const writer = stream.writable.getWriter();
-    const encoder = new TextEncoder();
-    const encReq = encoder.encode(JSON.stringify(msg));
-    let writtenLen = 0;
-    let totalWriteLen = encReq.length;
-    // write the size of msg
-    await writer.write(new Uint8Array([totalWriteLen]))
-    while (writtenLen < totalWriteLen) {
-      let bz = encReq.subarray(writtenLen, writtenLen + 1000)
-      await writer.write(encReq)
-      writtenLen += 1000;
-    }
-  }
+}
 
-  private async readFrom(stream: QUICStream): Promise<HubMessage> {
-    let collectedEncRes: Uint8Array[] = [];
-    let readLen = 0;
-    let totalReadLen: number = undefined;
-    for await (const encRes of stream.readable) {
+async function writeTo(stream: QUICStream, msg: HubMessage) {
+  const writer = stream.writable.getWriter();
+  const encoder = new TextEncoder();
+  const encReq = encoder.encode(JSON.stringify(msg));
+  let writtenLen = 0;
+  let totalWriteLen = encReq.length;
+  // write the size of msg
+  await writer.write(numberToU8Array(totalWriteLen))
+  while (writtenLen < encReq.length) {
+    let bz = encReq.subarray(writtenLen, writtenLen + 1000)
+    await writer.write(encReq)
+    writtenLen += 1000;
+  }
+}
+
+async function readFrom(stream: QUICStream): Promise<HubMessage> {
+  let collectedEncRes: Uint8Array[] = [];
+  let readLen = 0;
+  let totalReadLen: number = undefined;
+  for await (const encRes of stream.readable) {
+    if (!totalReadLen) {
+      console.log(`read len ${encRes}`)
+      totalReadLen = u8ArrayToNumber(encRes);
+    } else {
       console.log(`read ${encRes}`)
-      if (!totalReadLen) {
-        totalReadLen = encRes[0];
-      } else {
-        collectedEncRes.push(encRes)
-        readLen += encRes.length
-        if (readLen == totalReadLen) {
-          break;
-        }
+      collectedEncRes.push(encRes)
+      readLen += encRes.length
+      if (readLen == totalReadLen) {
+        break;
       }
     }
-
-    let encRes = combineUint8Arrays(collectedEncRes);
-    const decoder = new TextDecoder('utf-8');
-    let jsonRes = decoder.decode(encRes)
-    console.log(jsonRes);
-    let res: HubMessage = JSON.parse(jsonRes);
-    return res
   }
+
+  let encRes = combineUint8Arrays(collectedEncRes);
+  const decoder = new TextDecoder('utf-8');
+  let jsonRes = decoder.decode(encRes)
+  console.log(jsonRes);
+  let res: HubMessage = JSON.parse(jsonRes);
+  return res
 }
 
 function combineUint8Arrays(arrays: Uint8Array[]): Uint8Array {
@@ -99,4 +101,25 @@ function combineUint8Arrays(arrays: Uint8Array[]): Uint8Array {
   });
 
   return combinedArray;
+}
+
+
+function numberToU8Array(num): Uint8Array {
+  if (num < 0 || num > 65535) {
+    throw new RangeError('Number must be between 0 and 65535');
+  }
+  const highByte = (num >> 8) & 0xFF;
+  const lowByte = num & 0xFF;
+  return new Uint8Array([highByte, lowByte]);
+}
+
+function u8ArrayToNumber(u8Array): number {
+  if (u8Array.length !== 2) {
+    throw new Error('Uint8Array must have exactly 2 elements');
+  }
+
+  const highByte = u8Array[0];  // Most significant byte
+  const lowByte = u8Array[1];   // Least significant byte
+
+  return (highByte << 8) | lowByte;
 }
