@@ -8,7 +8,7 @@ const fetch = axios.create({
   baseURL: baseApi,
   timeout: 8000,
 });
-const { toast } = useToast();
+
 // Config
 
 // const ENTRY_ROUTE = `login`;
@@ -49,11 +49,11 @@ fetch.interceptors.response.use(
       error.response.status === 403 ||
       error.response.status === 401
     ) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error || "Auth",
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Error",
+      //   description: error || "Auth",
+      // });
       //   // Check Refresh Token
       //   if (getStorageData(storageKey.authRefreshToken)) {
       //     setStorageData(storageKey.checkAuthRefreshToken, "YES");

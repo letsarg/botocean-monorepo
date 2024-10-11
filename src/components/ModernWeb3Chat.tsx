@@ -49,51 +49,52 @@ export default function ModernWeb3Chat() {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [balance, setBalance] = useState(0);
   const [chatId, setChatId] = useState();
+  const [listModel, setListModel] = useState(models);
   const [messages, setMessages] = useState([
     {
       id: 1,
       content: "Hello! How can I assist you today?",
-      sender: "bot",
+      role: "bot",
       chat_id: 1,
     },
     {
       id: 2,
       content: "Hello! How can I assist you today2?",
-      sender: "user",
+      role: "user",
       chat_id: 1,
     },
     {
       id: 3,
       content: "Hello! How can I assist you today3?",
-      sender: "user",
+      role: "user",
       chat_id: 1,
     },
     {
       id: 4,
       content: "Hello! How can I assist you today3?",
-      sender: "bot",
+      role: "bot",
       chat_id: 1,
     },
     {
       id: 3,
       content: "Hello! How can I assist you today3?",
-      sender: "user",
+      role: "user",
       chat_id: 2,
     },
     {
       id: 4,
       content: "Hello! How can I assist you today3?",
-      sender: "bot",
+      role: "bot",
       chat_id: 2,
     },
   ]);
   const [messagesHistory, setMessagesHistory] = useState([
-    { id: 1, title: "Hello! How can I assist you today?" },
-    { id: 2, title: "Hello! How can I assist you today?" },
+    { id: 1, chatTitle: "Hello! How can I assist you today?" },
+    { id: 2, chatTitle: "Hello! How can I assist you today?" },
   ]);
   const [currentMessage, setcurrentMessage] = useState(1);
   const [inputMessage, setInputMessage] = useState("");
-  const [selectedModel, setSelectedModel] = useState(models[0].name);
+  const [selectedModel, setSelectedModel] = useState(listModel[0].name);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   useEffect(() => {
@@ -128,7 +129,16 @@ export default function ModernWeb3Chat() {
 
     getBalance();
   }, [account]);
+  const getModel = async () => {
+    try {
+      var res = await chatService.getActiveModel()
+      if (res.status === 200 || res.status === 201) {
+        setListModel(res.data);
+      }
+    } catch (error) {
 
+    }
+  }
   const sendMessage = async () => {
     if (inputMessage.trim()) {
       setMessages([
@@ -136,7 +146,7 @@ export default function ModernWeb3Chat() {
         {
           id: messages.length + 1,
           content: inputMessage,
-          sender: "user",
+          role: "user",
           chat_id: currentMessage,
         },
       ]);
@@ -165,7 +175,7 @@ export default function ModernWeb3Chat() {
             {
               id: prevMessages.length + 1,
               content: content,
-              sender: "assistant",
+              role: "assistant",
               chat_id: currentMessage,
             },
           ]);
@@ -175,28 +185,41 @@ export default function ModernWeb3Chat() {
       }
     }
   };
+  const getUserChatDetail = async (chatId: string) => {
+    try {
+      var response = await chatService.getUserChatDetail(chatId);
+      if (response.status === 200 || response.status === 201) {
+        setMessages(response.data);
+      }
+    } catch (error) {
 
+    }
+  }
+  const getListChatHistory = async (userId: string) => {
+    try {
+      var response = await chatService.getUserChathHistory(userId);
+      if (response.status === 200 || response.status === 201) {
+        setMessagesHistory(response.data);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
   const createNewChat = async () => {
-    setMessagesHistory([
-      ...messagesHistory,
-      {
-        id: messagesHistory.length + 1,
-        title: "Hello! How can I assist you today2?",
-      },
-    ]);
+
     setMessages([
       ...messages,
       {
         id: messages.length + 1,
         content: "Hello! How can I assist you today?",
-        sender: "bot",
+        role: "bot",
         chat_id: messagesHistory.length + 1,
       },
     ]);
     setcurrentMessage(messagesHistory.length + 1);
 
     const newChatData = {
-      user_id: "111111", // replace with the actual user ID
+      user_id: "ha", // replace with the actual user ID
       model: selectedModel, // replace with the actual model type
     };
 
@@ -206,6 +229,7 @@ export default function ModernWeb3Chat() {
       if (response.status === 201 || response.status === 200) {
         const data = await response.data.json();
         setChatId(data.chat_id);
+        await getListChatHistory(newChatData.user_id);
         console.log(data); // New chat created successfully
       }
     } catch (error) {
@@ -249,7 +273,7 @@ export default function ModernWeb3Chat() {
                 <div className="flex items-center space-x-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600 truncate">
-                    {message.title}
+                    {message.chatTitle}
                   </span>
                 </div>
               </div>
@@ -264,12 +288,12 @@ export default function ModernWeb3Chat() {
                     <span className="font-semibold text-gray-600">
                       Balance: {balance}
                     </span>{" "}
-                    <span className="font-bold text-gray-800">{} BOTSO</span>
+                    <span className="font-bold text-gray-800">{ } BOTSO</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-semibold text-gray-600">Model:</span>{" "}
                     <span className="font-bold text-gray-800">
-                      {models.find((m) => m.id === selectedModel)?.name}
+                      {listModel.find((m) => m.id === selectedModel)?.name}
                     </span>
                   </p>
                 </div>
@@ -297,7 +321,7 @@ export default function ModernWeb3Chat() {
                             <SelectValue placeholder="Select a model" />
                           </SelectTrigger>
                           <SelectContent>
-                            {models.map((model) => (
+                            {listModel.map((model) => (
                               <SelectItem key={model.id} value={model.id}>
                                 {model.name}
                               </SelectItem>
@@ -377,7 +401,7 @@ export default function ModernWeb3Chat() {
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent>
-                {models.map((model) => (
+                {listModel.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     {model.name}
                   </SelectItem>
@@ -403,23 +427,22 @@ export default function ModernWeb3Chat() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}
                 >
                   <div
-                    className={`max-w-sm rounded-lg p-4 ${
-                      message.sender === "user"
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-800 border border-gray-200"
-                    }`}
+                    className={`max-w-sm rounded-lg p-4 ${message.role === "user"
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-800 border border-gray-200"
+                      }`}
                   >
                     <div className="flex items-center space-x-2 mb-2">
-                      {message.sender === "user" ? (
+                      {message.role === "user" ? (
                         <User className="w-4 h-4" />
                       ) : (
                         <Bot className="w-4 h-4" />
                       )}
                       <span className="font-semibold">
-                        {message.sender === "user" ? "You" : "AI"}
+                        {message.role === "user" ? "You" : "AI"}
                       </span>
                     </div>
                     {message.content}

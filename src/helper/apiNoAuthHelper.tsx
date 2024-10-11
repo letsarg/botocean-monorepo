@@ -9,7 +9,7 @@ const fetchNoAuth = axios.create({
 });
 
 // Config
-const { toast } = useToast();
+// const { toast } = useToast();
 
 const AUTHORIZATION = "authorization";
 
@@ -49,11 +49,11 @@ fetchNoAuth.interceptors.response.use(
       error.response.status === 403 ||
       error.response.status === 401
     ) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.response.data.err_msg,
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Error",
+      //   description: error.response.data.err_msg,
+      // });
     }
 
     if (error.response.status === 404) {
