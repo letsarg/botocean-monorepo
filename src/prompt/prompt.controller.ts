@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { PromptService } from './prompt.service';
-import { CreatePromptDto, ModelType, NewChatDto, NewChatResDto } from './prompt.dto';
+import { CreatePromptDto, NewChatDto, NewChatResDto } from './prompt.dto';
 
 @Controller('prompt')
 export class PromptController {
@@ -14,9 +14,14 @@ export class PromptController {
 
   @Post('ask')
   async ask(@Body() body: CreatePromptDto) {
-    const { user_id, chat_id, model, prompt } = body;
+    let { user_id, chat_id, model, prompt } = body;
 
     // this.promptService.checkBalance()
+
+    if (!chat_id) {
+      const newChat = await this.promptService.newChat(user_id, model);
+      chat_id = newChat.chat_id;
+    }
 
     const result = await this.promptService.processPrompt(user_id, chat_id, model, prompt);
 

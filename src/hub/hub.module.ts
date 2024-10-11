@@ -4,7 +4,7 @@ import { AppConfigService } from 'src/app-config/app-config.service';
 import { ProviderModule } from 'src/provider/provider.module';
 
 @Module({
-  providers: [HubService, AppConfigService],
+  providers: [AppConfigService, HubService],
   imports: [ProviderModule]
 })
 export class HubModule { }

@@ -18,8 +18,8 @@ export class HubService implements OnModuleInit {
   private connIdToProvider: Map<string, ProviderInstance> = new Map();
 
   constructor(
-    private appConfig: AppConfigService,
-    private providerService: ProviderService,
+    private readonly appConfig: AppConfigService,
+    private readonly providerService: ProviderService,
   ) {
   }
 
@@ -81,27 +81,9 @@ export class HubService implements OnModuleInit {
     const conn = e.detail
     const connId = conn.connectionId.toString();
 
-    // stream to get provider info
-    const stream = conn.newStream();
-    const writer = stream.writable.getWriter();
-    const req: HubMessage = {
-      type: HubMessageType.ProviderInfoReq,
-    }
-    const encoder = new TextEncoder();
-    const encReq = encoder.encode(JSON.stringify(req));
-    await writer.write(encReq)
-    let res: HubMessage;
-    const decoder = new TextDecoder('utf-8');
-    for await (const encRes of stream.readable) {
-      res = JSON.parse(decoder.decode(encRes));
-      break;
-    }
-    await stream.destroy()
-
     let providerInst = new ProviderInstance();
-    providerInst.id = res.providerInfoRes.providerId;
-    providerInst.providerInfo = res.providerInfoRes
-    providerInst.quicConn = conn;
+    await providerInst.getProviderInfo(conn);
+
     this.connIdToProvider.set(connId, providerInst)
     this.providerService.registerProvider(providerInst);
 

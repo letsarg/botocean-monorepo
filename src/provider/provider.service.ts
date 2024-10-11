@@ -1,17 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ModelType } from 'src/prompt/prompt.dto';
+import { Injectable, Logger, Scope } from '@nestjs/common';
 import { ProviderInstance } from './provider-instance.dto';
 import { ProviderType } from 'src/hub/hub.dto';
+import { v4 as uuidv4 } from 'uuid';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class ProviderService {
   private logger = new Logger(ProviderService.name);
-
-  // Maps provider ID to a Provider instance
-  providerMap: Map<string, ProviderInstance> = new Map();
+  id = uuidv4();
 
   // Maps model type to an array of provider IDs
   modelProviderMap: Map<string, Set<string>> = new Map();
+
+  // Maps provider ID to a Provider instance
+  providerMap: Map<string, ProviderInstance> = new Map();
 
   // Registers a provider
   registerProvider(provider: ProviderInstance) {
@@ -37,7 +38,7 @@ export class ProviderService {
         providerIds = new Set();
       }
       providerIds.add(provider.id);
-      this.modelProviderMap = this.modelProviderMap.set(model, providerIds);
+      this.modelProviderMap.set(model, providerIds);
     }
 
     console.log(this.modelProviderMap)
@@ -72,7 +73,7 @@ export class ProviderService {
       if (providerIds) {
         providerIds.delete(provider.id);
         if (providerIds.values.length > 0) {
-          this.modelProviderMap = this.modelProviderMap.set(model, providerIds);
+          this.modelProviderMap.set(model, providerIds);
         } else {
           this.modelProviderMap.delete(model);
         }
@@ -81,10 +82,13 @@ export class ProviderService {
   }
 
   findProvidersByModel(model: string): ProviderInstance[] {
+    console.log(this.id);
+    console.log(this.modelProviderMap);
+
     // Get the list of provider IDs for the model
     const providerIds = this.modelProviderMap.get(model);
 
-    if (!providerIds || providerIds.values.length === 0) {
+    if (!providerIds || providerIds.size == 0) {
       return []; // No providers found for this model
     }
 

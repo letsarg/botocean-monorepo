@@ -10,7 +10,7 @@ export class NewChatResDto {
 
 export class CreatePromptDto {
   user_id: string;
-  chat_id: string;
+  chat_id?: string;
   model: string;
   prompt: string;
 }

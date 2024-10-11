@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ChatContent, ChatInfo, ModelType, NewChatResDto, UserChat } from './prompt.dto';
+import { ChatInfo, NewChatResDto } from './prompt.dto';
 import { ProviderService } from 'src/provider/provider.service';
-import { ProviderInstance } from 'src/provider/provider-instance.dto';
-import { OllamaService } from 'src/provider/ollama/ollama.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Message, ProviderType } from 'src/hub/hub.dto';
 
@@ -10,8 +8,6 @@ const TOKEN_PRICE = 0.00000000000001;
 
 @Injectable()
 export class PromptService {
-  private readonly UUID_NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
-
   /// userId -> chatId[]
   private userChats: Map<string, string[]> = new Map();
   /// chatId
@@ -20,7 +16,7 @@ export class PromptService {
   private chatHistories: Map<string, Message[]> = new Map();
 
   constructor(
-    private providerService: ProviderService,
+    private readonly providerService: ProviderService,
   ) {
   }
 
@@ -60,10 +56,6 @@ export class PromptService {
     }
 
     let chatHistories = this.chatHistories.get(chatId);
-    console.log(chatHistories);
-
-    console.log(this.providerService.modelProviderMap);
-    console.log(model);
     let providers = this.providerService.findProvidersByModel(model);
     if (providers.length == 0) {
       throw new Error('No providers for model found');
