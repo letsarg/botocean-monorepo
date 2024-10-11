@@ -34,7 +34,8 @@ import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import { isAptosNetwork } from '@aptos-labs/wallet-adapter-core';
+import { isAptosNetwork } from "@aptos-labs/wallet-adapter-core";
+import { chatService } from "@/service/ChatService";
 
 const models = [{ id: "qwen2:0.5b", name: "qwen2:0.5b" }];
 
@@ -49,12 +50,46 @@ export default function ModernWeb3Chat() {
   const [balance, setBalance] = useState(0);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useState([
-    { id: 1, content: "Hello! How can I assist you today?", sender: "bot" , idHistory:1},
-    { id: 2, content: "Hello! How can I assist you today2?", sender: "user",idHistory:1 },
-    { id: 3, content: "Hello! How can I assist you today3?", sender: "user",idHistory:1 },{ id: 4, content: "Hello! How can I assist you today3?", sender: "bot" ,idHistory:1}, { id: 3, content: "Hello! How can I assist you today3?", sender: "user",idHistory:2 },{ id: 4, content: "Hello! How can I assist you today3?", sender: "bot" ,idHistory:2},
+    {
+      id: 1,
+      content: "Hello! How can I assist you today?",
+      sender: "bot",
+      chat_id: 1,
+    },
+    {
+      id: 2,
+      content: "Hello! How can I assist you today2?",
+      sender: "user",
+      chat_id: 1,
+    },
+    {
+      id: 3,
+      content: "Hello! How can I assist you today3?",
+      sender: "user",
+      chat_id: 1,
+    },
+    {
+      id: 4,
+      content: "Hello! How can I assist you today3?",
+      sender: "bot",
+      chat_id: 1,
+    },
+    {
+      id: 3,
+      content: "Hello! How can I assist you today3?",
+      sender: "user",
+      chat_id: 2,
+    },
+    {
+      id: 4,
+      content: "Hello! How can I assist you today3?",
+      sender: "bot",
+      chat_id: 2,
+    },
   ]);
   const [messagesHistory, setMessagesHistory] = useState([
-    { id: 1, title: "Hello! How can I assist you today?" },{ id: 2, title: "Hello! How can I assist you today?" }
+    { id: 1, title: "Hello! How can I assist you today?" },
+    { id: 2, title: "Hello! How can I assist you today?" },
   ]);
   const [currentMessage, setcurrentMessage] = useState(1);
   const [inputMessage, setInputMessage] = useState("");
@@ -98,7 +133,12 @@ export default function ModernWeb3Chat() {
     if (inputMessage.trim()) {
       setMessages([
         ...messages,
-        { id: messages.length + 1, content: inputMessage, sender: "user" , idHistory:currentMessage },
+        {
+          id: messages.length + 1,
+          content: inputMessage,
+          sender: "user",
+          chat_id: currentMessage,
+        },
       ]);
       setInputMessage("");
 
@@ -110,33 +150,26 @@ export default function ModernWeb3Chat() {
       };
 
       try {
-        const response = await fetch("http://localhost:3001/prompt/ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newChatData),
-        });
+        const response = await chatService.postAsk(newChatData);
 
-        if (!response.ok) {
-          throw new Error("Failed to create new chat");
+        if (response.status === 201 || response.status === 200) {
+          const data = await response.data.json();
+
+          const content = data.response;
+          console.log(content);
+          const tokenCount = data.token_count;
+          const tokenPrice = data.token_price;
+          setBalance(balance - tokenCount * tokenPrice);
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              id: prevMessages.length + 1,
+              content: content,
+              sender: "assistant",
+              chat_id: currentMessage,
+            },
+          ]);
         }
-
-        const data = await response.json();
-        const content = data.response;
-        console.log(content);
-        const tokenCount = data.token_count;
-        const tokenPrice = data.token_price;
-        setBalance(balance - tokenCount * tokenPrice);
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: prevMessages.length + 1,
-            content: content,
-            sender: "assistant",
-            idHistory:currentMessage
-          },
-        ]);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -144,13 +177,23 @@ export default function ModernWeb3Chat() {
   };
 
   const createNewChat = async () => {
-    setMessagesHistory([...messagesHistory, 
-      { id: messagesHistory.length+1, title: "Hello! How can I assist you today2?", },
+    setMessagesHistory([
+      ...messagesHistory,
+      {
+        id: messagesHistory.length + 1,
+        title: "Hello! How can I assist you today2?",
+      },
     ]);
-    setMessages([...messages, 
-      { id: messages.length+1, content: "Hello! How can I assist you today?",sender:'bot' , idHistory: messagesHistory.length+1},
+    setMessages([
+      ...messages,
+      {
+        id: messages.length + 1,
+        content: "Hello! How can I assist you today?",
+        sender: "bot",
+        chat_id: messagesHistory.length + 1,
+      },
     ]);
-    setcurrentMessage(messagesHistory.length+1);
+    setcurrentMessage(messagesHistory.length + 1);
 
     const newChatData = {
       user_id: "111111", // replace with the actual user ID
@@ -158,21 +201,13 @@ export default function ModernWeb3Chat() {
     };
 
     try {
-      const response = await fetch("http://localhost:3001/prompt/newChat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newChatData),
-      });
+      const response = await chatService.postNewChat(newChatData);
 
-      if (!response.ok) {
-        throw new Error("Failed to create new chat");
+      if (response.status === 201 || response.status === 200) {
+        const data = await response.data.json();
+        setChatId(data.chat_id);
+        console.log(data); // New chat created successfully
       }
-
-      const data = await response.json();
-      setChatId(data.chat_id);
-      console.log(data); // New chat created successfully
     } catch (error) {
       console.error("Error:", error);
     }
@@ -205,7 +240,9 @@ export default function ModernWeb3Chat() {
           <ScrollArea className="flex-grow">
             {messagesHistory.map((message) => (
               <div
-              onClick={()=>{setcurrentMessage(message.id)}}
+                onClick={() => {
+                  setcurrentMessage(message.id);
+                }}
                 key={message.id}
                 className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
               >
@@ -357,36 +394,38 @@ export default function ModernWeb3Chat() {
         {/* Chat messages */}
         <ScrollArea className="flex-1 p-4 scroll-area">
           <AnimatePresence>
-            {messages.filter(item=>item.idHistory==currentMessage).map((message) =>  (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
-              >
-                <div
-                  className={`max-w-sm rounded-lg p-4 ${
-                    message.sender === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-800 border border-gray-200"
-                  }`}
+            {messages
+              .filter((item) => item.chat_id == currentMessage)
+              .map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
                 >
-                  <div className="flex items-center space-x-2 mb-2">
-                    {message.sender === "user" ? (
-                      <User className="w-4 h-4" />
-                    ) : (
-                      <Bot className="w-4 h-4" />
-                    )}
-                    <span className="font-semibold">
-                      {message.sender === "user" ? "You" : "AI"}
-                    </span>
+                  <div
+                    className={`max-w-sm rounded-lg p-4 ${
+                      message.sender === "user"
+                        ? "bg-blue-500 text-white"
+                        : "bg-white text-gray-800 border border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 mb-2">
+                      {message.sender === "user" ? (
+                        <User className="w-4 h-4" />
+                      ) : (
+                        <Bot className="w-4 h-4" />
+                      )}
+                      <span className="font-semibold">
+                        {message.sender === "user" ? "You" : "AI"}
+                      </span>
+                    </div>
+                    {message.content}
                   </div>
-                  {message.content}
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
           </AnimatePresence>
         </ScrollArea>
 
