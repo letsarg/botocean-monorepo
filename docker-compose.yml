@@ -7,8 +7,8 @@ services:
     ports:
       - "3000:3000"
       - "4433:4433"
-    depends_on:
-      - mongodb
+    # depends_on:
+      # - mongodb
     volumes:
       - ./config.yml:/usr/src/app/config.yml
 
