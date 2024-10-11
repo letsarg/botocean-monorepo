@@ -5,14 +5,15 @@ import { User } from './entities/user.entity';
 import * as crypto from 'crypto';
 import Redis from 'ioredis';
 import { ethers } from 'ethers';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Injectable()
 export class UserService {
   private redisClient: Redis;
 
-  constructor(private readonly jwtService: JwtService) {
+  constructor(private readonly jwtService: JwtService, readonly appConfig: AppConfigService) {
     this.redisClient = new Redis({
-      host: "redis",
+      host: appConfig.redisUrl,
       port: 6379
     });
   }
@@ -22,6 +23,11 @@ export class UserService {
   async findUserByWallet(wallet: string): Promise<User | null> {
     const user = await this.redisClient.get(`user:${wallet}`);
     return user ? JSON.parse(user) : null;
+  }
+
+  async findUserBalance(wallet: string): Promise<string> {
+    const res = await this.redisClient.get(`balance:${wallet}`)
+    return res
   }
 
   async createUser(wallet: string, signature: string): Promise<User> {
@@ -34,7 +40,6 @@ export class UserService {
 
   async login(wallet: string, signature: string): Promise<string> {
     let user = await this.findUserByWallet(wallet);
-
     if (!user) {
       user = await this.createUser(wallet, signature);
     }
