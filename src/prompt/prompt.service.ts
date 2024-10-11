@@ -100,4 +100,28 @@ export class PromptService {
       token_price: TOKEN_PRICE,
     };
   }
+
+  getUserChatHistory(userId: string): ChatInfo[] {
+    const chatIds = this.userChats.get(userId) || [];
+    const chatInfoList: ChatInfo[] = [];
+
+    for (const chatId of chatIds) {
+      const chatInfo = this.chatInfos.get(chatId);
+      if (chatInfo) {
+        chatInfoList.push(chatInfo);
+      }
+    }
+
+    return chatInfoList;
+  }
+
+  getChatDetail(chatId: string): Message[] {
+    const chatHistory = this.chatHistories.get(chatId);
+
+    if (!chatHistory) {
+      throw new Error(`Chat with ID ${chatId} not found`);
+    }
+
+    return chatHistory;
+  }
 }

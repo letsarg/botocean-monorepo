@@ -11,8 +11,7 @@ export class ProviderController {
 
   @Get()
   getProviders() {
-    console.log(this.providerService.id)
-    console.log(this.providerService.modelProviderMap)
-    return "hello"
+    const activeModels = this.providerService.getActiveModels();
+    return { models: activeModels };
   }
 }

@@ -1,30 +1,50 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { PromptService } from './prompt.service';
-import { CreatePromptDto, NewChatDto, NewChatResDto } from './prompt.dto';
+import { ChatInfo, CreatePromptDto, NewChatDto, NewChatResDto } from './prompt.dto';
+import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
+import { CurrentUser } from 'src/user/guard/current-user.decorator';
+import { User } from 'src/user/entities/user.entity';
+import { Message } from 'src/hub/hub.dto';
 
 @Controller('prompt')
 export class PromptController {
   constructor(private readonly promptService: PromptService) { }
 
   @Post('newChat')
-  async newChat(@Body() body: NewChatDto): Promise<NewChatResDto> {
-    const { user_id, model } = body;
-    return this.promptService.newChat(user_id, model);
+  @UseGuards(JwtAuthGuard)
+  async newChat(@Body() body: NewChatDto, @CurrentUser() user: User): Promise<NewChatResDto> {
+    const { model } = body;
+    return this.promptService.newChat(user.id, model);
   }
 
   @Post('ask')
-  async ask(@Body() body: CreatePromptDto) {
-    let { user_id, chat_id, model, prompt } = body;
+  @UseGuards(JwtAuthGuard)
+  async ask(@Body() body: CreatePromptDto, @CurrentUser() user: User) {
+    let { chat_id, model, prompt } = body;
 
     // this.promptService.checkBalance()
 
     if (!chat_id) {
-      const newChat = await this.promptService.newChat(user_id, model);
+      const newChat = await this.promptService.newChat(user.id, model);
       chat_id = newChat.chat_id;
     }
 
-    const result = await this.promptService.processPrompt(user_id, chat_id, model, prompt);
+    const result = await this.promptService.processPrompt(user.id, chat_id, model, prompt);
 
     return result;
+  }
+
+  @Get('chat-history')
+  @UseGuards(JwtAuthGuard)
+  getUserChatHistory(@CurrentUser() user: User): ChatInfo[] {
+    const userId = user.id;
+    console.log(userId)
+    return this.promptService.getUserChatHistory(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('chat/:chatId')
+  getChatDetail(@Param('chatId') chatId: string, @CurrentUser() user: User): Message[] {
+    return this.promptService.getChatDetail(chatId);
   }
 }

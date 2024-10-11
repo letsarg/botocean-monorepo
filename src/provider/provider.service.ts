@@ -98,4 +98,10 @@ export class ProviderService {
     }
     return insts;
   }
+
+  getActiveModels(): string[] {
+    // Iterate over the modelProviderMap and return keys (model names) that have registered providers
+    const activeModels = Array.from(this.modelProviderMap.keys());
+    return activeModels;
+  }
 }
