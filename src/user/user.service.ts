@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import Redis from 'ioredis';
 import { ethers } from 'ethers';
 import { AppConfigService } from 'src/app-config/app-config.service';
+import { Ed25519PublicKey, Ed25519Signature, Signature } from "@aptos-labs/ts-sdk";
 
 @Injectable()
 export class UserService {
@@ -48,19 +49,33 @@ export class UserService {
     return this.jwtService.sign(payload);
   }
 
-
-  async authenticate(wallet: string, providedSignature: string): Promise<{ token?: string }> {
-
-    if (await this.isSignatureValid(this.message, wallet, providedSignature)) {
-      const token = await this.login(wallet, providedSignature);
+  async authenticate(wallet: string, pubkey: string, signature: Signature): Promise<{ token?: string }> {
+    if (await this.verifySignature(this.message, pubkey, signature)) {
+      const token = await this.login(wallet, signature.toString());
       return { token };
     }
 
     throw new BadRequestException('Invalid signature')
   }
 
+  async verifySignature(
+    publicKey: string,
+    message: string,
+    signature: Signature,
+  ): Promise<boolean> {
+    return new Ed25519PublicKey(publicKey)
+      .verifySignature({
+        message: message,
+        signature: signature,
+      });
+  }
+
   async isSignatureValid(message, address, signature) {
     try {
+      new Ed25519PublicKey(address).verifySignature({
+        message: new TextEncoder().encode(message),
+        signature: signature,
+      });
       const signerAddr = await ethers.verifyMessage(message, signature);
       if (signerAddr !== address) {
         return false;
