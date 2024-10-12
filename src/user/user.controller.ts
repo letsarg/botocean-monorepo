@@ -13,7 +13,7 @@ export class UserController {
   async login(
     @Body('pubkey') pubkey: string,
     @Body('wallet') wallet: string,
-    @Body('signature') signature: Signature
+    @Body('signature') signature: string
   ) {
     return this.userService.authenticate(wallet, pubkey, signature);
   }
