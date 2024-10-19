@@ -1,27 +1,25 @@
 import { events, QUICServer, QUICSocket, ServerCryptoOps } from '@matrixai/quic';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import Logger, { LogLevel, StreamHandler, formatting } from '@matrixai/logger';
-import * as testsUtils from './utils';
+import * as testsUtils from '../utils';
 import * as fs from "fs"
+import { QuicConfig } from '../types';
 
 @Injectable()
-export class QuicService implements OnModuleInit {
-  private logger = new Logger(QuicService.name);
+export class QuicServerService implements OnModuleInit {
+  private logger = new Logger(QuicServerService.name);
+  private quicConfig: QuicConfig;
   private quicSocket: QUICSocket;
   private quicServer: QUICServer;
-  private quicLogger;
 
-  // private connIdToProvider: Map<string, ProviderInstance> = new Map();
-
-  constructor(
-    // TODO: passing necessary config for constructing QuicBundleService
-  ) {
+  constructor(quicConfig: QuicConfig) {
+    this.quicConfig = quicConfig;
   }
 
   async onModuleInit() {
-    const privateKey = fs.readFileSync(this.appConfig.hub.privkey_path, 'utf8');
-    const publicKey = fs.readFileSync(this.appConfig.hub.pubkey_path, 'utf8');
-    const certRSAPEM = fs.readFileSync(this.appConfig.hub.cert_path, 'utf8');
+    const privateKey = fs.readFileSync(this.quicConfig.privkey_path, 'utf8');
+    const publicKey = fs.readFileSync(this.quicConfig.pubkey_path, 'utf8');
+    const certRSAPEM = fs.readFileSync(this.quicConfig.cert_path, 'utf8');
     const keyPairRSAPEM = {
       publicKey,
       privateKey
@@ -40,10 +38,6 @@ export class QuicService implements OnModuleInit {
     this.quicSocket = new QUICSocket({
       logger: logger.getChild('socket'),
     });
-    await this.quicSocket.start({
-      host: this.appConfig.hub.host,
-      port: this.appConfig.hub.port,
-    });
     this.quicServer = new QUICServer({
       logger: logger.getChild(QUICServer.name),
       crypto: {
@@ -56,6 +50,24 @@ export class QuicService implements OnModuleInit {
       },
       socket: this.quicSocket,
     });
+  }
+
+  getQuicServer() {
+    return this.quicServer;
+  }
+
+  async quicServe() {
+    await this.quicSocket.start({
+      host: this.quicConfig.host,
+      port: this.quicConfig.port,
+    });
+    await this.quicServer.start({
+      host: this.quicConfig.host,
+      port: this.quicConfig.port,
+    })
+  }
+
+  private async addEventListener() {
     this.quicServer.addEventListener(
       events.EventQUICServerConnection.name,
       async (e: events.EventQUICServerConnection) => {
@@ -66,24 +78,18 @@ export class QuicService implements OnModuleInit {
         }
       }
     );
-    await this.quicServer.start({
-      host: this.appConfig.hub.host,
-      port: this.appConfig.hub.port,
-    })
   }
 
   private async handleConnection(e: events.EventQUICServerConnection) {
     const conn = e.detail
     const connId = conn.connectionId.toString();
 
-    let providerInst = new ProviderInstance();
-    await providerInst.getProviderInfo(conn);
+    // handle closed conn
+    conn.addEventListener(
+      events.EventQUICConnectionClose.name,
+      (e: events.EventQUICConnectionClose) => {
 
-    this.connIdToProvider.set(connId, providerInst)
-    this.providerService.registerProvider(providerInst);
-
-    conn.addEventListener(events.EventQUICConnectionClose.name, (e: events.EventQUICConnectionClose) => {
-      this.providerService.deregisterProvider(providerInst.id)
-    })
+      }
+    )
   }
 }
