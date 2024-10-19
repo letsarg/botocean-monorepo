@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AxenodeController } from './axenode.controller';
 import { AxenodeService } from './axenode.service';
-import { AxeControllerModule } from './axe-controller/axe-controller.module';
+import { BundleControllerModule } from './bundle-controller/bundle-controller.module';
 
 @Module({
-  imports: [AxeControllerModule],
+  imports: [BundleControllerModule],
   controllers: [AxenodeController],
   providers: [AxenodeService],
 })

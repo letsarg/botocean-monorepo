@@ -9,7 +9,6 @@ import { AppConfigModule } from './app-config/app-config.module';
 // import { ProviderModule } from './provider/provider.module';
 // import { HubModule } from './hub/hub.module';
 // import { UserModule } from './user/user.module';
-import { AxeBundleRegModule } from './axe-bundle-reg/axe-bundle-reg.module';
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import { AxeBundleRegModule } from './axe-bundle-reg/axe-bundle-reg.module';
     // ProviderModule,
     // HubModule,
     // UserModule,
-    AxeBundleRegModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],
