@@ -1,24 +1,28 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { CID, create, IPFSHTTPClient } from 'ipfs-http-client';
 
 @Injectable()
 export class BundleRegistryService implements OnModuleInit {
   private logger = new Logger(BundleRegistryService.name);
   private ipfs: IPFSHTTPClient;
+  private bundleBasePath;
   constructor() {
+    // this.bundleRegistryConfig = appConfig.bundleRegistryConfig;
+    // this.bundleBasePath = path.join(appConfig.bundleRegistryConfig.basePath, '');
+    this.bundleBasePath = path.join(__dirname, 'bundleReg');
     this.ipfs = create();
   }
 
   async onModuleInit() {
-    // this.helia = await createHelia()
   }
 
   async pull(cid: string) {
     try {
-      const dirPath = path.join(__dirname, cid);
-      await this.saveDir(CID.parse(cid), dirPath)
+      const bundlePath = path.join(this.bundleBasePath, cid);
+      console.log(bundlePath);
+      await this.saveDir(CID.parse(cid), bundlePath)
 
       this.logger.log(`Pulled bundle CID: ${cid}`);
     } catch (error) {
@@ -35,7 +39,7 @@ export class BundleRegistryService implements OnModuleInit {
         await this.saveFile(file.cid, filePath)
       } else {
         const childDirPath = path.join(dirPath, file.name)
-        await this.saveDir(cid, childDirPath)
+        await this.saveDir(file.cid, childDirPath)
       }
     }
   }
