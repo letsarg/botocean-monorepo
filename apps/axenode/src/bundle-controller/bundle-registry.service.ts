@@ -1,25 +1,29 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { create } from 'ipfs-http-client';
+import { CID } from 'multiformats/cid'
 import fs from 'fs';
 import path from 'path';
+import { create } from 'kubo-rpc-client';
 
 @Injectable()
 export class BundleRegistryService implements OnModuleInit {
   private logger = new Logger(BundleRegistryService.name);
+  private helia;
   constructor() {
   }
 
   async onModuleInit() {
+    // this.helia = await createHelia()
   }
 
   async pull(cid: string) {
     try {
-      // Connect to your self-hosted IPFS node
-      const ipfs = create({
-        host: 'localhost',  // Your IPFS node host
-        port: 5001,         // Your IPFS API port
-        protocol: 'http'    // Use 'https' if your IPFS node uses SSL
-      });
+      // const ufs = unixfs(this.helia);
+      const ipfs = create();
+
+      // for await (const file of ufs.cat(CID.parse(cid))) {
+      //   const outputPath = path.join(__dirname, cid);
+      //   fs.appendFileSync(outputPath, file);
+      // }
 
       for await (const file of ipfs.cat(cid)) {
         const outputPath = path.join(__dirname, cid);
