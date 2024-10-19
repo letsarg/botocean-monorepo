@@ -23,17 +23,17 @@ export class BundleControllerService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // try {
-    //   const readNamespaceRes = await this.k8sApi.readNamespace(BOTOCEAN_K8S_NAMESPACE.metadata.name);
-    //   console.log('Namespace: ', readNamespaceRes.body);
+    try {
+      const readNamespaceRes = await this.k8sApi.readNamespace(BOTOCEAN_K8S_NAMESPACE.metadata.name);
+      console.log('Namespace: ', readNamespaceRes.body);
 
-    //   const createNamespaceRes = await this.k8sApi.createNamespace(BOTOCEAN_K8S_NAMESPACE);
-    //   console.log('New namespace created: ', createNamespaceRes.body);
+      const createNamespaceRes = await this.k8sApi.createNamespace(BOTOCEAN_K8S_NAMESPACE);
+      console.log('New namespace created: ', createNamespaceRes.body);
 
-    //   await this.k8sApi.deleteNamespace(BOTOCEAN_K8S_NAMESPACE.metadata.name);
-    // } catch (err) {
-    //   console.error(err);
-    // }
+      await this.k8sApi.deleteNamespace(BOTOCEAN_K8S_NAMESPACE.metadata.name);
+    } catch (err) {
+      console.error(err);
+    }
 
     await this.deployAxeBundle("QmcoKCHjainCqtM6rjCNS6nATkBRKcUGmX89TxruijeSVY");
   }
