@@ -3,16 +3,16 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import Logger, { LogLevel, StreamHandler, formatting } from '@matrixai/logger';
 import * as testsUtils from '../utils';
 import * as fs from "fs"
-import { QuicConfig } from '../types';
+import { QuicServerConfig } from '../types';
 
 @Injectable()
 export class QuicServerService implements OnModuleInit {
   private logger = new Logger(QuicServerService.name);
-  private quicConfig: QuicConfig;
+  private quicConfig: QuicServerConfig;
   private quicSocket: QUICSocket;
   private quicServer: QUICServer;
 
-  constructor(quicConfig: QuicConfig) {
+  constructor(quicConfig: QuicServerConfig) {
     this.quicConfig = quicConfig;
   }
 
