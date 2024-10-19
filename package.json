@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.29.1",
+    "@kubernetes/client-node": "^0.22.1",
     "@matrixai/quic": "^1.3.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",

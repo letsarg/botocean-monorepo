@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { PromptService } from './prompt.service';
 import { ChatInfo, CreatePromptDto, NewChatDto, NewChatResDto } from './prompt.dto';
-import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
-import { CurrentUser } from 'src/user/guard/current-user.decorator';
-import { User } from 'src/user/entities/user.entity';
-import { Message } from 'src/hub/hub.dto';
+import { Message } from 'ollama';
+import { CurrentUser } from '../user/guard/current-user.decorator';
+import { JwtAuthGuard } from '../user/guard/jwt.guard';
+import { User } from '../user/entities/user.entity';
 
 @Controller('prompt')
 export class PromptController {

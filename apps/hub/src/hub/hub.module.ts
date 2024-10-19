@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HubService } from './hub.service';
-import { AppConfigService } from 'src/app-config/app-config.service';
-import { ProviderModule } from 'src/provider/provider.module';
+import { AppConfigService } from '../app-config/app-config.service';
+import { ProviderModule } from '../provider/provider.module';
 
 @Module({
   providers: [AppConfigService, HubService],

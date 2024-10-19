@@ -1,7 +1,7 @@
 import { Injectable, Logger, Scope } from '@nestjs/common';
 import { ProviderInstance } from './provider-instance.dto';
-import { ProviderType } from 'src/hub/hub.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { ProviderType } from '../hub/hub.dto';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class ProviderService {

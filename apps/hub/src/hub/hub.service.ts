@@ -3,10 +3,9 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import Logger, { LogLevel, StreamHandler, formatting } from '@matrixai/logger';
 import * as testsUtils from './utils';
 import * as fs from "fs"
-import { AppConfigService } from 'src/app-config/app-config.service';
-import { HubMessage, HubMessageType } from './hub.dto';
-import { ProviderInstance } from 'src/provider/provider-instance.dto';
-import { ProviderService } from 'src/provider/provider.service';
+import { AppConfigService } from '../app-config/app-config.service';
+import { ProviderInstance } from '../provider/provider-instance.dto';
+import { ProviderService } from '../provider/provider.service';
 
 @Injectable()
 export class HubService implements OnModuleInit {

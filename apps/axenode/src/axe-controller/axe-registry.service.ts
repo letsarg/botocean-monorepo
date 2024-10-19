@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AxeRegistryService {
-  push() {}
-  pull() {}
-  query() {}
+  getX(id: string) {
+
+  }
+
+  pullX(id: string) {
+
+  }
 }

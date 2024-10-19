@@ -6,10 +6,10 @@ import * as yaml from 'yaml';
 import * as fs from 'fs';
 import { AppConfigService } from './app-config/app-config.service';
 import { AppConfigModule } from './app-config/app-config.module';
-import { ProviderModule } from './provider/provider.module';
-import { HubModule } from './hub/hub.module';
-import { UserModule } from './user/user.module';
-import { AxeRegistryModule } from './axe-registry/axe-registry.module';
+// import { ProviderModule } from './provider/provider.module';
+// import { HubModule } from './hub/hub.module';
+// import { UserModule } from './user/user.module';
+import { AxeBundleRegModule } from './axe-bundle-reg/axe-bundle-reg.module';
 
 @Module({
   imports: [
@@ -23,10 +23,10 @@ import { AxeRegistryModule } from './axe-registry/axe-registry.module';
       isGlobal: true,
     }),
     AppConfigModule,
-    ProviderModule,
-    HubModule,
-    UserModule,
-    AxeRegistryModule,
+    // ProviderModule,
+    // HubModule,
+    // UserModule,
+    AxeBundleRegModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],

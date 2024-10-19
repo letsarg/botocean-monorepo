@@ -5,8 +5,8 @@ import { User } from './entities/user.entity';
 import * as crypto from 'crypto';
 import Redis from 'ioredis';
 import { ethers } from 'ethers';
-import { AppConfigService } from 'src/app-config/app-config.service';
 import { Ed25519PublicKey, Ed25519Signature, HexInput, Signature } from "@aptos-labs/ts-sdk";
+import { AppConfigService } from '../app-config/app-config.service';
 
 @Injectable()
 export class UserService {

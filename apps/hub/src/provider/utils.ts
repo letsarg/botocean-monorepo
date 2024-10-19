@@ -1,5 +1,5 @@
 import { QUICStream } from "@matrixai/quic";
-import { HubMessage } from "src/hub/hub.dto";
+import { HubMessage } from "../hub/hub.dto";
 
 export async function readFrom(stream: QUICStream): Promise<HubMessage> {
   let collectedEncRes: Uint8Array[] = [];

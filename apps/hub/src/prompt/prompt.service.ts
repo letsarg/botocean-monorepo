@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ChatInfo, NewChatResDto } from './prompt.dto';
-import { ProviderService } from 'src/provider/provider.service';
 import { v4 as uuidv4 } from 'uuid';
-import { Message, ProviderType } from 'src/hub/hub.dto';
+import { Message } from 'ollama';
+import { ProviderType } from '../hub/hub.dto';
+import { ProviderService } from '../provider/provider.service';
 
 const TOKEN_PRICE = 0.00000000000001;
 

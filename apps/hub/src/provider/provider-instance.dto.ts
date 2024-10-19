@@ -1,6 +1,7 @@
 import { QUICConnection, QUICStream } from "@matrixai/quic";
-import { HubMessage, HubMessageType, Message, ProviderInfo } from "src/hub/hub.dto";
 import { numberToU8Array, readFrom, writeTo } from "./utils";
+import { Message } from "ollama";
+import { ProviderInfo, HubMessage, HubMessageType } from "../hub/hub.dto";
 
 export class ProviderInstance {
   id: string;

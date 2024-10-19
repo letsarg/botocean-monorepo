@@ -1,5 +1,5 @@
 import ollama from 'ollama';
-import { ChatContent } from 'src/prompt/prompt.dto';
+import { ChatContent } from '../../prompt/prompt.dto';
 
 export class OllamaService {
   async chat(model: string, content: ChatContent, histories: ChatContent[]) {
