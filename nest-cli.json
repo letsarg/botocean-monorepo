@@ -1,24 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/money-printer/src",
+  "sourceRoot": "apps/hub/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/money-printer/tsconfig.app.json"
+    "tsConfigPath": "apps/hub/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/money-printer",
+  "root": "apps/hub",
   "projects": {
-    "money-printer": {
-      "type": "application",
-      "root": "apps/money-printer",
-      "entryFile": "main",
-      "sourceRoot": "apps/money-printer/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/money-printer/tsconfig.app.json"
-      }
-    },
     "hub": {
       "type": "application",
       "root": "apps/hub",
