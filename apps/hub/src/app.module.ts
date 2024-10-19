@@ -9,6 +9,7 @@ import { AppConfigModule } from './app-config/app-config.module';
 import { ProviderModule } from './provider/provider.module';
 import { HubModule } from './hub/hub.module';
 import { UserModule } from './user/user.module';
+import { AxeRegistryModule } from './axe-registry/axe-registry.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
     ProviderModule,
     HubModule,
     UserModule,
+    AxeRegistryModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],

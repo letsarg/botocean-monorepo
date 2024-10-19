@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MessageBundleService } from './message_bundle.service';
-import { QuicModule, QuicService } from '@app/core';
+import { QuicModule, QuicServerService } from '@app/core';
 
 @Module({
   imports: [QuicModule],
-  providers: [QuicService, MessageBundleService],
+  providers: [QuicServerService, MessageBundleService],
 })
 export class MessageBundleModule { }
