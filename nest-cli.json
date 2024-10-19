@@ -45,6 +45,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/core/tsconfig.lib.json"
       }
+    },
+    "message_bundle": {
+      "type": "application",
+      "root": "apps/message_bundle",
+      "entryFile": "main",
+      "sourceRoot": "apps/message_bundle/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/message_bundle/tsconfig.app.json"
+      }
     }
   }
 }
