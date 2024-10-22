@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AxenodeModule } from './../src/axenode.module';
+import { SeanodeModule } from './../src/seanode.module';
 
-describe('AxenodeController (e2e)', () => {
+describe('SeanodeController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AxenodeModule],
+      imports: [SeanodeModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();

@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AxenodeModule } from './axenode.module';
+import { SeanodeModule } from './seanode.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AxenodeModule);
+  const app = await NestFactory.create(SeanodeModule);
   await app.listen(3000);
 }
 bootstrap();

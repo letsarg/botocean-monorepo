@@ -1,4 +1,4 @@
-# Axenode
+# seanode
 Requirements:
 ```
 brew install kubectl

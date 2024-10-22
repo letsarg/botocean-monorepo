@@ -19,13 +19,13 @@
         "tsConfigPath": "apps/hub/tsconfig.app.json"
       }
     },
-    "axenode": {
+    "seanode": {
       "type": "application",
-      "root": "apps/axenode",
+      "root": "apps/seanode",
       "entryFile": "main",
-      "sourceRoot": "apps/axenode/src",
+      "sourceRoot": "apps/seanode/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/axenode/tsconfig.app.json"
+        "tsConfigPath": "apps/seanode/tsconfig.app.json"
       }
     },
     "core": {
