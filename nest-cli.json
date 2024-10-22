@@ -45,6 +45,24 @@
       "compilerOptions": {
         "tsConfigPath": "apps/message_bundle/tsconfig.app.json"
       }
+    },
+    "algoceanbridge_bundle": {
+      "type": "application",
+      "root": "apps/algoceanbridge_bundle",
+      "entryFile": "main",
+      "sourceRoot": "apps/algoceanbridge_bundle/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/algoceanbridge_bundle/tsconfig.app.json"
+      }
+    },
+    "accounting_bundle": {
+      "type": "application",
+      "root": "apps/accounting_bundle",
+      "entryFile": "main",
+      "sourceRoot": "apps/accounting_bundle/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/accounting_bundle/tsconfig.app.json"
+      }
     }
   }
 }
